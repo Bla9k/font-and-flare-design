@@ -20,8 +20,8 @@ export default function Home() {
           getSeasonalAnime()
         ]);
         
-        setTopAnime(top);
-        setSeasonalAnime(seasonal);
+        setTopAnime(top || []);
+        setSeasonalAnime(seasonal || []);
       } catch (error) {
         console.error("Error fetching anime data:", error);
         toast({
@@ -60,9 +60,15 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {topAnime.slice(0, 10).map((anime) => (
-                <AnimeCard key={anime.mal_id} anime={anime} />
-              ))}
+              {topAnime && topAnime.length > 0 ? (
+                topAnime.slice(0, 10).map((anime) => (
+                  <AnimeCard key={anime.mal_id} anime={anime} />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-anime-cyberpunk-blue">No top anime found</p>
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -85,13 +91,19 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {seasonalAnime.slice(0, 6).map((anime) => (
-                <AnimeCard 
-                  key={anime.mal_id} 
-                  anime={anime} 
-                  className="h-[380px]" 
-                />
-              ))}
+              {seasonalAnime && seasonalAnime.length > 0 ? (
+                seasonalAnime.slice(0, 6).map((anime) => (
+                  <AnimeCard 
+                    key={anime.mal_id} 
+                    anime={anime} 
+                    className="h-[380px]" 
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-anime-cyberpunk-blue">No seasonal anime found</p>
+                </div>
+              )}
             </div>
           )}
         </section>
