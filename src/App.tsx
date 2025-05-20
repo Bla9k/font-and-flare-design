@@ -10,7 +10,6 @@ import Discover from "./pages/Discover";
 import AnimeDetails from "./pages/AnimeDetails";
 import Favorites from "./pages/Favorites";
 import NotFound from "./pages/NotFound";
-import Manga from "./pages/Manga";
 
 const queryClient = new QueryClient();
 
@@ -23,9 +22,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/discover" element={<Discover />} />
-          <Route path="/anime" element={<Home />} />
           <Route path="/anime/:id" element={<AnimeDetails />} />
-          <Route path="/manga" element={<Manga />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
