@@ -1,0 +1,92 @@
+
+// Base Jikan API URL
+const API_URL = "https://api.jikan.moe/v4";
+
+// Common types
+export interface Anime {
+  mal_id: number;
+  title: string;
+  images: {
+    jpg: {
+      image_url: string;
+      small_image_url: string;
+      large_image_url: string;
+    },
+    webp: {
+      image_url: string;
+      small_image_url: string;
+      large_image_url: string;
+    }
+  };
+  synopsis: string;
+  score: number;
+  episodes: number;
+  status: string;
+  rating: string;
+  genres: {
+    mal_id: number;
+    name: string;
+  }[];
+  aired: {
+    from: string;
+    to: string;
+  };
+}
+
+export interface JikanResponse<T> {
+  pagination: {
+    last_visible_page: number;
+    has_next_page: boolean;
+  };
+  data: T;
+}
+
+// API functions
+
+// Get top anime
+export const getTopAnime = async (): Promise<Anime[]> => {
+  try {
+    const response = await fetch(`${API_URL}/top/anime?limit=20`);
+    const data: JikanResponse<Anime[]> = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error("Error fetching top anime:", error);
+    return [];
+  }
+};
+
+// Get seasonal anime
+export const getSeasonalAnime = async (): Promise<Anime[]> => {
+  try {
+    const response = await fetch(`${API_URL}/seasons/now`);
+    const data: JikanResponse<Anime[]> = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error("Error fetching seasonal anime:", error);
+    return [];
+  }
+};
+
+// Get anime by ID
+export const getAnimeById = async (id: number): Promise<Anime | null> => {
+  try {
+    const response = await fetch(`${API_URL}/anime/${id}`);
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error(`Error fetching anime with ID ${id}:`, error);
+    return null;
+  }
+};
+
+// Search anime
+export const searchAnime = async (query: string): Promise<Anime[]> => {
+  try {
+    const response = await fetch(`${API_URL}/anime?q=${encodeURIComponent(query)}&limit=20`);
+    const data: JikanResponse<Anime[]> = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error("Error searching anime:", error);
+    return [];
+  }
+};

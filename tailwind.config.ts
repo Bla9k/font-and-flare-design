@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,11 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'digital': ['"Share Tech Mono"', 'monospace'],
+				'sans': ['"Inter"', 'sans-serif'],
+				'display': ['"Rajdhani"', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,6 +67,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				anime: {
+					red: '#FF2A45',
+					blue: '#A2C4FF',
+					dark: '#121212',
+					gray: '#282828',
+					'light-gray': '#3A3A3A',
+					'cyberpunk-blue': '#00F0FF',
 				}
 			},
 			borderRadius: {
@@ -84,11 +98,24 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+				'glitch': {
+					'0%, 100%': { transform: 'translate(0)' },
+					'20%': { transform: 'translate(-5px, 5px)' },
+					'40%': { transform: 'translate(-5px, -5px)' },
+					'60%': { transform: 'translate(5px, 5px)' },
+					'80%': { transform: 'translate(5px, -5px)' },
+				},
+				'scanline': {
+					'0%': { transform: 'translateY(0)' },
+					'100%': { transform: 'translateY(100%)' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'glitch': 'glitch 1s infinite',
+				'scanline': 'scanline 8s linear infinite',
 			}
 		}
 	},
