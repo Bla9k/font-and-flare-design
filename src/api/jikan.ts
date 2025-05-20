@@ -31,16 +31,6 @@ export interface Anime {
     from: string;
     to: string;
   };
-  // Add missing properties that are used in AnimeDetails
-  title_japanese?: string;
-  studios?: {
-    mal_id: number;
-    name: string;
-  }[];
-  producers?: {
-    mal_id: number;
-    name: string;
-  }[];
 }
 
 export interface JikanResponse<T> {
