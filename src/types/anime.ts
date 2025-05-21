@@ -14,6 +14,13 @@ export interface Anime {
   }[];
   synopsis?: string;
   score?: number;
+  episodes?: number;
+  status?: string;
+  rating?: string;
+  aired?: {
+    from?: string;
+    to?: string;
+  };
 }
 
 export interface AnimeResponse {
