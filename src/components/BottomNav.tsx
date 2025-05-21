@@ -47,6 +47,8 @@ export default function BottomNav() {
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         // Scrolling down - hide the nav
         setIsVisible(false);
+        // Also collapse the nav when scrolling down
+        setIsExpanded(false);
       } else if (currentScrollY < lastScrollY) {
         // Scrolling up - show the nav
         setIsVisible(true);
@@ -59,7 +61,7 @@ export default function BottomNav() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Toggle expanded state when clicked
+  // Toggle expanded state only when clicked on the nav bar itself
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   };
@@ -79,9 +81,10 @@ export default function BottomNav() {
           "px-3 py-1 rounded-full bg-anime-dark/90 backdrop-blur-md border border-anime-red/30",
           "shadow-[0_0_15px_0px_rgba(255,42,69,0.3)] cyberpunk-border",
           "transition-all duration-300 ease-in-out",
-          isExpanded ? "w-[330px]" : "w-[240px]"
+          isExpanded ? "w-[350px]" : "w-[280px]"
         )}
         onClick={handleToggle}
+        style={{ height: "38px" }} // Making the nav bar thinner
       >
         <div className="relative">
           {/* Glitch effect */}
@@ -111,7 +114,7 @@ export default function BottomNav() {
                     <Link 
                       to={item.path}
                       className={cn(
-                        "flex items-center p-1.5 transition-all duration-300",
+                        "flex items-center px-1.5 py-1 transition-all duration-300",
                         isActive 
                           ? "text-anime-red" 
                           : "text-gray-400 hover:text-gray-200"
@@ -122,7 +125,7 @@ export default function BottomNav() {
                       }}
                     >
                       <div className={cn(
-                        "relative p-1.5 rounded-lg transition-all duration-300",
+                        "relative p-1 rounded-lg transition-all duration-300",
                         isActive && "bg-anime-dark/70 shadow-[0_0_8px_0px_rgba(255,42,69,0.3)]"
                       )}>
                         {item.icon}
