@@ -60,6 +60,17 @@
     @apply border border-anime-cyberpunk-blue shadow-[0_0_5px_0px_#00F0FF] relative;
   }
 
+  .cyberpunk-glow {
+    @apply relative;
+    box-shadow: 0 0 10px 0 rgba(0, 240, 255, 0.3);
+  }
+
+  .cyberpunk-glow::after {
+    content: "";
+    @apply absolute inset-0 border border-anime-cyberpunk-blue opacity-30;
+    animation: glow 2s infinite alternate;
+  }
+
   .glitch-text {
     @apply relative inline-block;
     text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75), -0.025em -0.05em 0 rgba(0, 255, 0, 0.75), 0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
@@ -77,4 +88,63 @@
     @apply pointer-events-none fixed inset-0 z-50 h-full w-full opacity-[0.03];
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
+
+  .starry-sky {
+    @apply bg-anime-dark;
+    background-image: 
+      radial-gradient(1px 1px at 25px 50px, white, rgba(255, 255, 255, 0)),
+      radial-gradient(1px 1px at 50px 100px, white, rgba(255, 255, 255, 0)), 
+      radial-gradient(1px 1px at 100px 150px, white, rgba(255, 255, 255, 0)),
+      radial-gradient(1.5px 1.5px at 200px 50px, white, rgba(255, 255, 255, 0)),
+      radial-gradient(1.5px 1.5px at 300px 250px, white, rgba(255, 255, 255, 0)),
+      radial-gradient(2px 2px at 400px 350px, #00F0FF, rgba(0, 240, 255, 0)),
+      radial-gradient(2px 2px at 450px 100px, #FF2A45, rgba(255, 42, 69, 0));
+    background-size: 600px 600px;
+    animation: starsMovement 100s linear infinite;
+  }
+}
+
+@keyframes glitch {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes glow {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes starsMovement {
+  0% { background-position: 0 0; }
+  100% { background-position: 600px 600px; }
+}
+
+/* Page transition animations */
+.page-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.page-exit {
+  opacity: 1;
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 300ms, transform 300ms;
 }
