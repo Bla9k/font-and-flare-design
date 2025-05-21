@@ -1,396 +1,436 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Layout from "@/components/Layout";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Anime } from "@/types/anime";
-import AnimeCard from "@/components/AnimeCard";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search as SearchIcon, X, SlidersHorizontal, ArrowRight, RotateCcw } from "lucide-react";
+import { Search as SearchIcon, Film, BookOpen, X } from "lucide-react";
+import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 
-export default function Search() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [aiSearchQuery, setAiSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Anime[]>([]);
-  const [aiResults, setAiResults] = useState<Anime[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [minScore, setMinScore] = useState([5]);
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [availableGenres, setAvailableGenres] = useState<{mal_id: number, name: string}[]>([]);
+// Mock results for the demo (in a real app, these would come from an API call)
+const mockAnimeResults = [
+  { mal_id: 1, title: "Attack on Titan", type: "anime", image_url: "https://cdn.myanimelist.net/images/anime/10/47347.jpg" },
+  { mal_id: 2, title: "Death Note", type: "anime", image_url: "https://cdn.myanimelist.net/images/anime/9/9453.jpg" },
+  { mal_id: 3, title: "Fullmetal Alchemist: Brotherhood", type: "anime", image_url: "https://cdn.myanimelist.net/images/anime/1223/96541.jpg" },
+];
 
-  // Initialize genres
+const mockMangaResults = [
+  { mal_id: 1, title: "Berserk", type: "manga", image_url: "https://cdn.myanimelist.net/images/manga/1/157897.jpg" },
+  { mal_id: 2, title: "Vagabond", type: "manga", image_url: "https://cdn.myanimelist.net/images/manga/1/259070.jpg" },
+  { mal_id: 3, title: "One Piece", type: "manga", image_url: "https://cdn.myanimelist.net/images/manga/2/253146.jpg" },
+];
+
+// Check for Japanese characters in a string
+function hasJapanese(str: string) {
+  return /[\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF\u3400-\u4DBF]/.test(str);
+}
+
+export default function SearchPage() {
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showWaitlist, setShowWaitlist] = useState(false);
+  const [email, setEmail] = useState("");
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchType, setSearchType] = useState<"all" | "anime" | "manga">("all");
+
+  // Load recent searches from localStorage on component mount
   useEffect(() => {
-    const fetchGenres = async () => {
-      try {
-        const response = await fetch("https://api.jikan.moe/v4/genres/anime");
-        const data = await response.json();
-        if (data && data.data) {
-          setAvailableGenres(data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching genres:", error);
-      }
-    };
-    
-    fetchGenres();
+    const savedSearches = localStorage.getItem("recent_searches");
+    if (savedSearches) {
+      setRecentSearches(JSON.parse(savedSearches));
+    }
   }, []);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
+  // Focus search input when dialog opens
+  useEffect(() => {
+    if (open && searchInputRef.current) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  }, [open]);
+
+  // Handle search submission
+  const handleSearch = () => {
+    if (!searchTerm.trim()) return;
     
-    setLoading(true);
+    setIsLoading(true);
+    
+    // Save to recent searches
+    if (!recentSearches.includes(searchTerm)) {
+      const newSearches = [searchTerm, ...recentSearches].slice(0, 5);
+      setRecentSearches(newSearches);
+      localStorage.setItem("recent_searches", JSON.stringify(newSearches));
+    }
+    
+    // For the demo we'll use mock data and add some delay to simulate API call
+    setTimeout(() => {
+      if (hasJapanese(searchTerm)) {
+        // If search term contains Japanese characters, simulate AI-powered search
+        toast({
+          title: "AI Translation Detected",
+          description: "Translated Japanese query and searching...",
+        });
+      }
+      
+      // Filter mock results based on search type
+      let results: any[] = [];
+      
+      if (searchType === "all" || searchType === "anime") {
+        results = [...results, ...mockAnimeResults.filter(item => 
+          item.title.toLowerCase().includes(searchTerm.toLowerCase())
+        )];
+      }
+      
+      if (searchType === "all" || searchType === "manga") {
+        results = [...results, ...mockMangaResults.filter(item => 
+          item.title.toLowerCase().includes(searchTerm.toLowerCase())
+        )];
+      }
+      
+      // If no direct matches, pretend the AI found something
+      if (results.length === 0) {
+        if (searchType === "all" || searchType === "anime") {
+          results.push(mockAnimeResults[0]);
+        }
+        if (searchType === "all" || searchType === "manga") {
+          results.push(mockMangaResults[0]);
+        }
+        
+        toast({
+          title: "AI-Powered Results",
+          description: "Using semantic search to find related content",
+        });
+      }
+      
+      setSearchResults(results);
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchTerm("");
     setSearchResults([]);
-    
-    try {
-      // Build query params
-      const params = new URLSearchParams();
-      params.append("q", searchQuery);
-      
-      if (showAdvanced) {
-        params.append("min_score", minScore[0].toString());
-        
-        if (selectedGenres.length > 0) {
-          params.append("genres", selectedGenres.join(","));
-        }
-      }
-      
-      const response = await fetch(`https://api.jikan.moe/v4/anime?${params.toString()}&sfw=true`);
-      const data = await response.json();
-      
-      if (data && data.data) {
-        setSearchResults(data.data);
-        
-        if (data.data.length === 0) {
-          toast({
-            title: "No results found",
-            description: "Try a different search term or filters",
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error searching anime:", error);
-      toast({
-        title: "Search failed",
-        description: "There was an error processing your search. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
     }
   };
 
-  const handleAISearch = async () => {
-    if (!aiSearchQuery.trim()) return;
+  // Handle waitlist email submission
+  const handleWaitlistSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    setAiLoading(true);
-    setAiResults([]);
-    
-    try {
-      // First translate the natural language query into search parameters
+    if (!email || !email.includes('@')) {
       toast({
-        title: "AI Search Processing",
-        description: "Converting your request into search parameters...",
-      });
-      
-      // Simulate AI processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Parse the query to extract search parameters
-      const keywords = aiSearchQuery.toLowerCase();
-      let genreParam = "";
-      let scoreParam = "";
-      let queryParam = "";
-      
-      // Simple AI-like parsing (in a real app, this would use a real AI model)
-      if (keywords.includes("action") || keywords.includes("fight")) {
-        genreParam = "1"; // Action genre
-      } else if (keywords.includes("romance") || keywords.includes("love")) {
-        genreParam = "22"; // Romance genre
-      } else if (keywords.includes("fantasy") || keywords.includes("magic")) {
-        genreParam = "10"; // Fantasy genre
-      }
-      
-      if (keywords.includes("good") || keywords.includes("best") || keywords.includes("top")) {
-        scoreParam = "7"; // Good rated anime
-      }
-      
-      // Extract main query terms
-      queryParam = aiSearchQuery
-        .replace(/with|featuring|about|like|similar to|recommend|good|best|top|action|romance|fantasy|magic|fight/gi, "")
-        .trim();
-      
-      // Build the actual search params
-      const params = new URLSearchParams();
-      
-      if (queryParam) {
-        params.append("q", queryParam);
-      }
-      
-      if (genreParam) {
-        params.append("genres", genreParam);
-      }
-      
-      if (scoreParam) {
-        params.append("min_score", scoreParam);
-      }
-      
-      // Now perform the actual search
-      const response = await fetch(`https://api.jikan.moe/v4/anime?${params.toString()}&limit=12&sfw=true`);
-      const data = await response.json();
-      
-      if (data && data.data) {
-        setAiResults(data.data);
-        
-        toast({
-          title: "AI Search Complete",
-          description: `Found ${data.data.length} results for "${aiSearchQuery}"`,
-        });
-        
-        if (data.data.length === 0) {
-          toast({
-            title: "No results found",
-            description: "Try a different description or request",
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error with AI search:", error);
-      toast({
-        title: "AI Search failed",
-        description: "There was an error processing your query. Please try again.",
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
         variant: "destructive"
       });
-    } finally {
-      setAiLoading(false);
+      return;
     }
-  };
-
-  const handleRandomAnime = async () => {
-    setLoading(true);
     
-    try {
-      const response = await fetch("https://api.jikan.moe/v4/random/anime");
-      const data = await response.json();
-      
-      if (data && data.data) {
-        setSearchResults([data.data]);
-        toast({
-          title: "Random Anime Found",
-          description: `Check out "${data.data.title}"!`,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching random anime:", error);
-      toast({
-        title: "Random search failed",
-        description: "There was an error finding a random anime. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+    // In a real app, this would send the email to your backend
+    toast({
+      title: "Added to Waitlist",
+      description: "You'll be notified when AI Search is available!",
+    });
+    
+    setShowWaitlist(false);
+    setEmail("");
   };
 
-  const toggleGenre = (genreName: string) => {
-    setSelectedGenres(prev => 
-      prev.includes(genreName)
-        ? prev.filter(g => g !== genreName)
-        : [...prev, genreName]
-    );
+  // Japanese text animation for the search hints
+  const textVariants = {
+    initial: { 
+      opacity: 0, 
+      y: 20,
+    },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.5,
+      }
+    },
+    exit: { 
+      opacity: 0,
+      y: -20,
+      transition: { 
+        duration: 0.3 
+      }
+    }
   };
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl md:text-4xl font-display font-bold mb-8 relative">
-          <span className="text-anime-cyberpunk-blue">[</span> 
-          Search
-          <span className="text-anime-cyberpunk-blue">_</span>
-          <span className="text-anime-red">]</span>
-        </h1>
-        
-        <Tabs defaultValue="standard" className="mb-8">
-          <TabsList className="w-full bg-anime-gray mb-4">
-            <TabsTrigger value="standard" className="flex-1">Standard Search</TabsTrigger>
-            <TabsTrigger value="ai" className="flex-1">AI Search</TabsTrigger>
-          </TabsList>
+        <div className="max-w-3xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10 text-center"
+          >
+            <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
+              <span className="text-anime-red">カスパー</span> Search
+            </h1>
+            <p className="text-gray-300 md:text-lg">Find anime and manga with our intelligent search system.</p>
+          </motion.div>
           
-          <TabsContent value="standard" className="space-y-4">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Input
-                  placeholder="Search for anime..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="pr-10 bg-anime-gray border-anime-light-gray"
-                />
-                {searchQuery && (
-                  <button
-                    className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-                    onClick={() => setSearchQuery("")}
-                  >
-                    <X size={16} />
-                  </button>
-                )}
+          {/* Search bar */}
+          <div className="relative mx-auto max-w-lg mb-16">
+            <div className="relative">
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
+                placeholder="Type anything, even in Japanese..."
+                className="w-full h-14 bg-anime-gray border-2 border-anime-light-gray focus:border-anime-red rounded-lg pl-12 pr-12 text-white focus:outline-none transition-colors"
+              />
+              <div className="absolute left-4 top-4">
+                <SearchIcon className="h-6 w-6 text-gray-400" />
               </div>
-              <Button onClick={handleSearch} disabled={loading} className="bg-anime-red hover:bg-anime-red/90">
-                {loading ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  >
-                    <RotateCcw size={18} />
-                  </motion.div>
-                ) : (
-                  <SearchIcon size={18} />
-                )}
-              </Button>
-              <Button onClick={handleRandomAnime} variant="outline" className="border-anime-light-gray">
-                Random
-              </Button>
-            </div>
-            
-            {/* Advanced Search Toggle */}
-            <div className="flex justify-between items-center">
+              {searchTerm && (
+                <button 
+                  className="absolute right-14 top-4 text-gray-400 hover:text-white transition-colors"
+                  onClick={clearSearch}
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              )}
               <button 
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                className="flex items-center text-sm text-anime-cyberpunk-blue"
+                className={`absolute right-3 top-3 px-2 py-1 rounded-lg font-digital text-xs border ${
+                  searchType === "all" ? "border-anime-red text-anime-red" : 
+                  searchType === "anime" ? "border-anime-cyberpunk-blue text-anime-cyberpunk-blue" :
+                  "border-anime-red/50 text-anime-red/50"
+                }`}
+                onClick={() => setSearchType(searchType === "all" ? "anime" : searchType === "anime" ? "manga" : "all")}
               >
-                <SlidersHorizontal size={14} className="mr-1" />
-                {showAdvanced ? "Hide Advanced Search" : "Show Advanced Search"}
+                {searchType === "all" ? "ALL" : searchType === "anime" ? "ANIME" : "MANGA"}
               </button>
             </div>
             
-            {/* Advanced Search Options */}
-            <AnimatePresence>
-              {showAdvanced && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden bg-anime-dark/40 p-4 rounded-lg border border-anime-light-gray/30"
-                >
-                  <div className="mb-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <Label>Minimum Score: {minScore[0]}</Label>
-                      <span className="text-xs text-gray-400">({minScore[0]}/10)</span>
-                    </div>
-                    <Slider
-                      defaultValue={[5]}
-                      min={0}
-                      max={10}
-                      step={0.5}
-                      value={minScore}
-                      onValueChange={setMinScore}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label className="block mb-2">Genres</Label>
-                    <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1">
-                      {availableGenres.slice(0, 15).map((genre) => (
-                        <div key={genre.mal_id} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`genre-${genre.mal_id}`}
-                            checked={selectedGenres.includes(genre.mal_id.toString())}
-                            onCheckedChange={() => toggleGenre(genre.mal_id.toString())}
-                          />
-                          <label
-                            htmlFor={`genre-${genre.mal_id}`}
-                            className="text-sm peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {genre.name}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <button 
+              onClick={handleSearch}
+              disabled={!searchTerm.trim() || isLoading}
+              className="mt-4 w-full bg-anime-red hover:bg-opacity-90 disabled:opacity-50 text-white font-display py-3 rounded-lg transition-all"
+            >
+              {isLoading ? 
+                <span className="flex items-center justify-center">
+                  <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                  Searching...
+                </span> : 
+                "Search"
+              }
+            </button>
             
-            {/* Search Results */}
-            {searchResults.length > 0 && (
-              <div className="mt-8">
-                <h2 className="text-2xl font-display font-bold mb-4">Results</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                  {searchResults.map((anime) => (
-                    <AnimeCard key={anime.mal_id} anime={anime} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="ai" className="space-y-4">
-            <div className="bg-gradient-to-r from-anime-gray to-anime-dark p-5 rounded-lg border border-anime-light-gray/30">
-              <h2 className="text-xl font-display font-bold mb-2 text-anime-cyberpunk-blue">CASPER AI Search</h2>
-              <p className="text-gray-400 mb-4 text-sm">
-                Describe what you're looking for in natural language, and our AI will find it.
-              </p>
-              
-              <div className="flex flex-col gap-2">
-                <textarea
-                  placeholder="Example: Show me anime with magical girls and good action scenes"
-                  value={aiSearchQuery}
-                  onChange={(e) => setAiSearchQuery(e.target.value)}
-                  className="w-full p-3 bg-anime-gray border border-anime-light-gray rounded-md resize-none h-24"
-                />
-                
-                <Button 
-                  onClick={handleAISearch} 
-                  disabled={aiLoading} 
-                  className="bg-anime-cyberpunk-blue hover:bg-anime-cyberpunk-blue/90 flex items-center justify-center gap-2"
-                >
-                  {aiLoading ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
-                      <RotateCcw size={18} />
-                    </motion.div>
-                  ) : (
-                    <>
-                      Search with AI <ArrowRight size={16} />
-                    </>
-                  )}
-                </Button>
-              </div>
-              
-              <div className="mt-4 text-sm text-gray-400">
-                <p>Examples:</p>
-                <ul className="list-disc list-inside ml-2 space-y-1">
-                  <li>"Find me fantasy anime with strong female characters"</li>
-                  <li>"What are some good romance anime with comedy?"</li>
-                  <li>"I want something similar to Attack on Titan"</li>
-                </ul>
-              </div>
+            {/* Waitlist CTA */}
+            <div className="mt-3 text-center">
+              <button 
+                onClick={() => setShowWaitlist(true)}
+                className="text-anime-cyberpunk-blue hover:text-anime-red text-sm transition-colors"
+              >
+                Try our AI-powered search (early access waitlist)
+              </button>
             </div>
             
-            {/* AI Search Results */}
-            {aiResults.length > 0 && (
+            {/* Recent searches */}
+            {recentSearches.length > 0 && !searchResults.length && (
               <div className="mt-8">
-                <h2 className="text-2xl font-display font-bold mb-4">AI Search Results</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                  {aiResults.map((anime) => (
-                    <AnimeCard key={anime.mal_id} anime={anime} />
+                <h3 className="text-sm font-digital text-gray-400 mb-3 flex items-center">
+                  <SearchIcon className="h-4 w-4 mr-1" />
+                  RECENT SEARCHES
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {recentSearches.map((term, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSearchTerm(term);
+                        handleSearch();
+                      }}
+                      className="px-3 py-1 bg-anime-gray hover:bg-anime-light-gray rounded-full text-sm transition-colors"
+                    >
+                      {term}
+                    </button>
                   ))}
                 </div>
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+          
+          {/* Search results */}
+          <AnimatePresence mode="wait">
+            {isLoading ? (
+              <motion.div 
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-center py-10"
+              >
+                <div className="inline-flex flex-col items-center">
+                  <div className="h-16 w-16 border-4 border-anime-red border-t-transparent rounded-full animate-spin"></div>
+                  
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ 
+                      opacity: [0, 1, 0],
+                      transition: { repeat: Infinity, duration: 2 }
+                    }}
+                    className="mt-6 font-jp text-2xl"
+                  >
+                    検索中...
+                  </motion.div>
+                </div>
+              </motion.div>
+            ) : searchResults.length > 0 ? (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="mb-6 pb-3 border-b border-anime-light-gray/30">
+                  <h2 className="text-xl font-display">Search Results</h2>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {searchResults.map((result) => (
+                    <Link 
+                      key={`${result.type}-${result.mal_id}`}
+                      to={`/${result.type}/${result.mal_id}`}
+                      className="bg-anime-gray/60 backdrop-blur-sm border border-anime-light-gray rounded-lg overflow-hidden hover:border-anime-red transition-colors"
+                    >
+                      <div className="relative h-48">
+                        <img 
+                          src={result.image_url} 
+                          alt={result.title}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-2 right-2 px-2 py-1 rounded bg-anime-dark/80 backdrop-blur-sm text-xs font-digital">
+                          {result.type === 'anime' ? (
+                            <div className="flex items-center text-anime-cyberpunk-blue">
+                              <Film className="h-3 w-3 mr-1" />
+                              ANIME
+                            </div>
+                          ) : (
+                            <div className="flex items-center text-anime-red">
+                              <BookOpen className="h-3 w-3 mr-1" />
+                              MANGA
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-display font-medium">{result.title}</h3>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+          
+          {/* Japanese animated typography hints */}
+          <div className="relative h-96 overflow-hidden mt-20">
+            <AnimatePresence>
+              {!searchResults.length && !isLoading && (
+                <>
+                  <motion.div 
+                    key="hint-1"
+                    className="absolute top-0 left-0 writing-vertical text-anime-red/10 font-jp font-black text-9xl"
+                    variants={textVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                  >
+                    検索
+                  </motion.div>
+                  
+                  <motion.div 
+                    key="hint-2"
+                    className="absolute top-20 right-10 text-anime-cyberpunk-blue/10 font-jp font-black text-7xl"
+                    variants={textVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ delay: 0.3 }}
+                  >
+                    アニメ
+                  </motion.div>
+                  
+                  <motion.div 
+                    key="hint-3"
+                    className="absolute bottom-10 left-20 text-anime-red/10 font-jp font-black text-8xl"
+                    variants={textVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ delay: 0.6 }}
+                  >
+                    マンガ
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
+      
+      {/* Waitlist Modal */}
+      {showWaitlist && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-anime-gray border border-anime-light-gray rounded-lg w-full max-w-md p-6 m-4"
+          >
+            <h3 className="text-xl font-display font-bold mb-1">AI Search Waitlist</h3>
+            <p className="text-gray-300 text-sm mb-6">
+              Join the waitlist for early access to our AI-powered search, which can understand natural language and translate searches in any language.
+            </p>
+            
+            <form onSubmit={handleWaitlistSubmit}>
+              <input 
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full h-12 bg-anime-dark border border-anime-light-gray focus:border-anime-red rounded-lg px-4 text-white focus:outline-none transition-colors mb-3"
+                required
+              />
+              
+              <div className="flex justify-end space-x-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowWaitlist(false)}
+                  className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-anime-red hover:bg-opacity-90 text-white rounded transition-colors"
+                >
+                  Join Waitlist
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </Layout>
   );
 }

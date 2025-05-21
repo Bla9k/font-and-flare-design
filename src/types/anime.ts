@@ -4,15 +4,9 @@ export interface Anime {
   title: string;
   images: {
     jpg: {
-      image_url: string;
-      small_image_url: string;
       large_image_url: string;
-    };
-    webp: {
-      image_url: string;
-      small_image_url: string;
-      large_image_url: string;
-    };
+      image_url?: string;
+    }
   };
   genres?: {
     mal_id: number;
@@ -35,17 +29,4 @@ export interface AnimeResponse {
     last_visible_page: number;
     has_next_page: boolean;
   };
-}
-
-export interface GachaCard {
-  id: string;
-  title: string;
-  imageUrl: string;
-  rarity: "R" | "SR" | "SSR" | "UR";
-  series: string;
-  description: string;
-  tagline: string;
-  stars: number;
-  type: "anime" | "manga";
-  backgroundColor?: string;
 }
