@@ -23,6 +23,7 @@ export default {
 				'digital': ['"Share Tech Mono"', 'monospace'],
 				'sans': ['"Inter"', 'sans-serif'],
 				'display': ['"Rajdhani"', 'sans-serif'],
+				'jp': ['"Noto Sans JP"', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -110,12 +111,33 @@ export default {
 					'0%': { transform: 'translateY(0)' },
 					'100%': { transform: 'translateY(100%)' },
 				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' },
+				},
+				'pulse-light': {
+					'0%, 100%': { opacity: '0.7' },
+					'50%': { opacity: '0.3' },
+				},
+				'text-flicker': {
+					'0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%': {
+						opacity: '0.99',
+						textShadow: '-2px -2px 10px rgba(255, 42, 69, 0.5), 2px 2px 10px rgba(0, 240, 255, 0.5)'
+					},
+					'20%, 24%, 55%': {
+						opacity: '0.5',
+						textShadow: 'none'
+					}
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'glitch': 'glitch 1s infinite',
 				'scanline': 'scanline 8s linear infinite',
+				'float': 'float 6s ease-in-out infinite',
+				'pulse-light': 'pulse-light 4s ease-in-out infinite',
+				'text-flicker': 'text-flicker 3s linear infinite'
 			}
 		}
 	},

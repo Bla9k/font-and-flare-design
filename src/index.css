@@ -1,5 +1,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -66,6 +67,25 @@
     animation: glitch 500ms infinite;
   }
 
+  .glitch-effect {
+    position: relative;
+    overflow: hidden;
+    animation: noise-anim 2s infinite linear alternate-reverse;
+  }
+
+  .glitch-effect::before {
+    content: attr(data-text);
+    position: absolute;
+    left: -2px;
+    text-shadow: 1px 0 rgba(0, 240, 255, 0.7);
+    top: 0;
+    color: #FF2A45;
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+    animation: noise-anim-2 3s infinite linear alternate-reverse;
+    text-shadow: -1px -1px 0 rgba(0, 240, 255, 0.4), 1px 1px 0 rgba(255, 42, 69, 0.4);
+  }
+
   .scanline {
     @apply pointer-events-none fixed inset-0 z-50 h-full w-full bg-transparent opacity-5;
     background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.5) 51%);
@@ -83,6 +103,34 @@
     background-image:
       linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+  }
+
+  /* Writing vertical text for Japanese characters */
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+
+  /* Barcode styling */
+  .barcode-text {
+    font-family: 'Libre Barcode 39', cursive;
+    font-size: 2rem;
+    letter-spacing: -2px;
+  }
+
+  /* Stylized text blocks */
+  .text-block-stylized {
+    @apply relative p-4 border border-anime-red/30;
+  }
+  
+  .text-block-stylized::before {
+    content: "";
+    @apply absolute top-0 left-0 w-2 h-2 border-t border-l border-anime-red;
+  }
+
+  .text-block-stylized::after {
+    content: "";
+    @apply absolute bottom-0 right-0 w-2 h-2 border-b border-r border-anime-red;
   }
 
   /* Starry Sky Animation */
@@ -125,6 +173,7 @@
     opacity: 0.9;
   }
 
+  /* Animations */
   @keyframes stars {
     0% {
       transform: translateY(0);
@@ -136,14 +185,77 @@
 
   @keyframes glitch {
     0%, 100% { transform: translate(0); }
-    20% { transform: translate(-5px, 5px); }
-    40% { transform: translate(-5px, -5px); }
-    60% { transform: translate(5px, 5px); }
-    80% { transform: translate(5px, -5px); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
   }
 
   @keyframes scanline {
     0% { transform: translateY(0); }
     100% { transform: translateY(100%); }
   }
+
+  @keyframes noise-anim {
+    0% {
+      clip-path: inset(40% 0 61% 0);
+    }
+    20% {
+      clip-path: inset(92% 0 1% 0);
+    }
+    40% {
+      clip-path: inset(43% 0 1% 0);
+    }
+    60% {
+      clip-path: inset(25% 0 58% 0);
+    }
+    80% {
+      clip-path: inset(54% 0 7% 0);
+    }
+    100% {
+      clip-path: inset(58% 0 43% 0);
+    }
+  }
+
+  @keyframes noise-anim-2 {
+    0% {
+      clip-path: inset(29% 0 25% 0);
+    }
+    20% {
+      clip-path: inset(61% 0 36% 0);
+    }
+    40% {
+      clip-path: inset(60% 0 33% 0);
+    }
+    60% {
+      clip-path: inset(100% 0 1% 0);
+    }
+    80% {
+      clip-path: inset(15% 0 79% 0);
+    }
+    100% {
+      clip-path: inset(33% 0 12% 0);
+    }
+  }
+
+  /* Page transitions */
+  .page-enter {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  .page-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 300ms, transform 300ms;
+  }
+  .page-exit {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .page-exit-active {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 300ms, transform 300ms;
+  }
 }
+

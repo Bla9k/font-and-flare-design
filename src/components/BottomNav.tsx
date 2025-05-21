@@ -1,8 +1,9 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Heart, Search, Film, BookOpen, ChevronUp, ChevronDown } from "lucide-react";
+import { Home, Heart, Search, Film, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   {
@@ -34,20 +35,21 @@ const navItems = [
 
 export default function BottomNav() {
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
 
-  // Handle scroll events to auto-collapse/expand the navbar
+  // Handle scroll events to auto-hide the navbar
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down
-        setIsCollapsed(true);
+        // Scrolling down - hide the nav
+        setIsVisible(false);
       } else if (currentScrollY < lastScrollY) {
-        // Scrolling up
-        setIsCollapsed(false);
+        // Scrolling up - show the nav
+        setIsVisible(true);
       }
       
       setLastScrollY(currentScrollY);
@@ -57,68 +59,95 @@ export default function BottomNav() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
+  // Toggle expanded state when clicked
+  const handleToggle = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
-    <div className={cn(
-      "fixed bottom-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ease-in-out",
-      isCollapsed ? "translate-y-24" : "translate-y-0"
-    )}>
-      {/* Toggle button */}
-      <button 
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -top-8 left-1/2 -translate-x-1/2 bg-anime-dark/80 backdrop-blur-md p-1 rounded-t-md border-t border-l border-r border-anime-cyberpunk-blue/30 text-anime-cyberpunk-blue hover:text-white transition-colors"
+    <motion.div 
+      className="fixed bottom-3 left-1/2 z-50"
+      initial={{ translateX: "-50%", translateY: 0 }}
+      animate={{ 
+        translateX: "-50%", 
+        translateY: isVisible ? 0 : 100
+      }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.nav 
+        className={cn(
+          "px-3 py-1 rounded-full bg-anime-dark/90 backdrop-blur-md border border-anime-red/30",
+          "shadow-[0_0_15px_0px_rgba(255,42,69,0.3)] cyberpunk-border",
+          "transition-all duration-300 ease-in-out",
+          isExpanded ? "w-[330px]" : "w-[240px]"
+        )}
+        onClick={handleToggle}
       >
-        {isCollapsed ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </button>
-    
-      <nav className="px-1 py-1 rounded-xl bg-anime-dark/80 backdrop-blur-md border border-anime-cyberpunk-blue/30 shadow-[0_0_15px_0px_rgba(0,240,255,0.3)] cyberpunk-border w-[90%] max-w-md">
         <div className="relative">
           {/* Glitch effect */}
-          <div className="absolute inset-0 bg-anime-red/10 opacity-20 rounded-xl overflow-hidden">
+          <div className="absolute inset-0 bg-anime-red/5 opacity-20 rounded-full overflow-hidden">
             <div className="h-px w-full bg-anime-cyberpunk-blue/40 absolute top-[30%] animate-[glitch_2s_infinite]"></div>
             <div className="h-px w-full bg-anime-red/40 absolute top-[60%] animate-[glitch_1.5s_infinite]"></div>
-            <div className="h-full w-px bg-anime-cyberpunk-blue/40 absolute left-[25%] animate-[glitch_2.5s_infinite]"></div>
-            <div className="h-full w-px bg-anime-red/40 absolute left-[75%] animate-[glitch_1.75s_infinite]"></div>
           </div>
           
-          <ul className="flex justify-around items-center relative z-10">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path || 
+          <motion.ul 
+            className="flex justify-center items-center relative z-10"
+            layout
+          >
+            <AnimatePresence>
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.path || 
                               (item.path !== "/" && location.pathname.startsWith(item.path));
                               
-              return (
-                <li key={item.path} className="relative">
-                  <Link 
-                    to={item.path}
-                    className={cn(
-                      "flex flex-col items-center p-2 transition-all duration-300",
-                      isActive 
-                        ? "text-anime-cyberpunk-blue" 
-                        : "text-gray-400 hover:text-gray-200"
-                    )}
+                return (
+                  <motion.li 
+                    key={item.path} 
+                    className="relative"
+                    initial={!isExpanded && item.name !== "Home" ? { opacity: 0, width: 0 } : { opacity: 1 }}
+                    animate={isExpanded || item.name === "Home" ? { opacity: 1, width: "auto" } : { opacity: 0, width: 0 }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <div className={cn(
-                      "relative p-2 rounded-lg transition-all duration-300",
-                      isActive && "bg-anime-dark shadow-[0_0_8px_0px_rgba(0,240,255,0.3)]"
-                    )}>
-                      {item.icon}
-                      {isActive && (
-                        <span className="absolute top-0 right-0 h-2 w-2 bg-anime-red rounded-full animate-pulse" />
+                    <Link 
+                      to={item.path}
+                      className={cn(
+                        "flex items-center p-1.5 transition-all duration-300",
+                        isActive 
+                          ? "text-anime-red" 
+                          : "text-gray-400 hover:text-gray-200"
                       )}
-                    </div>
-                    <span className="text-xs mt-1 font-digital">{item.name}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-          
-          {/* Casper Logo */}
-          <div className="absolute -top-12 left-1/2 -translate-x-1/2 text-anime-cyberpunk-blue opacity-70 font-digital text-xs tracking-widest">
-            <div className="text-center animate-pulse">CASPER</div>
-            <div className="h-0.5 w-12 bg-anime-cyberpunk-blue/30 mx-auto"></div>
-          </div>
+                      onClick={(e) => {
+                        // Don't close the menu if link is clicked
+                        e.stopPropagation();
+                      }}
+                    >
+                      <div className={cn(
+                        "relative p-1.5 rounded-lg transition-all duration-300",
+                        isActive && "bg-anime-dark/70 shadow-[0_0_8px_0px_rgba(255,42,69,0.3)]"
+                      )}>
+                        {item.icon}
+                        {isActive && (
+                          <span className="absolute top-0 right-0 h-1.5 w-1.5 bg-anime-red rounded-full animate-pulse" />
+                        )}
+                      </div>
+                      {isExpanded && (
+                        <motion.span 
+                          className="text-xs ml-1 font-digital tracking-wider whitespace-nowrap overflow-hidden"
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {item.name}
+                        </motion.span>
+                      )}
+                    </Link>
+                  </motion.li>
+                );
+              })}
+            </AnimatePresence>
+          </motion.ul>
         </div>
-      </nav>
-    </div>
+      </motion.nav>
+    </motion.div>
   );
 }
