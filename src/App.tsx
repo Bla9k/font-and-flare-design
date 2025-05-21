@@ -14,10 +14,13 @@ import AnimeDetails from "./pages/AnimeDetails";
 import Favorites from "./pages/Favorites";
 import NotFound from "./pages/NotFound";
 import Manga from "./pages/Manga";
+import MangaDetails from "./pages/MangaDetails";
+import Search from "./pages/Search";
+import Gacha from "./pages/Gacha";
 
 const queryClient = new QueryClient();
 
-// AnimatedRoutes component to handle page transitions
+// AnimatedRoutes component to handle page transitions with Japanese text overlays
 const AnimatedRoutes = () => {
   const location = useLocation();
   
@@ -29,8 +32,10 @@ const AnimatedRoutes = () => {
         <Route path="/anime" element={<AnimeBrowse />} />
         <Route path="/anime/:id" element={<AnimeDetails />} />
         <Route path="/manga" element={<MangaBrowse />} />
-        <Route path="/manga/:id" element={<Manga />} />
+        <Route path="/manga/:id" element={<MangaDetails />} />
         <Route path="/favorites" element={<Favorites />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/gacha" element={<Gacha />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>

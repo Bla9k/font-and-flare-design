@@ -1,5 +1,6 @@
 
 import { ReactNode, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -8,6 +9,9 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+  
   // Add a random glitch effect to the page occasionally
   useEffect(() => {
     const createGlitchEffect = () => {
@@ -80,87 +84,76 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </div>
       
-      {/* Casper Logo in top left - Modified to only use red */}
-      <div className="fixed top-5 left-5 z-50">
-        <motion.div 
-          className="flex flex-col items-center"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-        >
-          <div className="relative">
-            <div className="text-anime-red font-display text-2xl tracking-[0.3em] animate-text-flicker">CASPER</div>
-          </div>
-          <div className="h-0.5 w-full bg-anime-red/50 mt-1"></div>
-          <div className="text-xs font-digital text-gray-400 tracking-[0.2em] mt-1">アニメパラダイス</div>
-        </motion.div>
-      </div>
+      {/* Casper Logo in top left - Only shown on home page */}
+      {isHomePage && (
+        <div className="fixed top-5 left-5 z-50">
+          <motion.div 
+            className="flex flex-col items-center"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <div className="relative group cursor-pointer" title="CASPER v1.0.0">
+              <div className="text-anime-red font-display text-2xl tracking-[0.3em] animate-text-flicker">CASPER</div>
+              <div className="absolute top-full left-0 w-full bg-anime-dark/80 p-2 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                <span className="text-xs font-digital text-anime-cyberpunk-blue">v1.0.0</span>
+              </div>
+            </div>
+            <div className="h-0.5 w-full bg-anime-red/50 mt-1"></div>
+            <div className="text-xs font-digital text-gray-400 tracking-[0.2em] mt-1">アニメパラダイス</div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Enhanced Japanese Typography Elements - Made larger and more expressive */}
-      <div className="fixed top-0 right-0 w-24 h-full flex flex-col justify-between items-center z-10 pointer-events-none">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-10">
+        {/* Larger floating typography */}
         <motion.div 
-          className="writing-vertical text-anime-red/40 font-jp font-bold text-3xl tracking-widest mt-20"
+          className="absolute top-1/3 right-5 writing-vertical text-anime-red/20 font-jp font-black text-8xl tracking-widest"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.9 }}
-          transition={{ delay: 0.5, duration: 1 }}
-        >
-          カスパー
-        </motion.div>
-        <motion.div 
-          className="writing-vertical text-anime-cyberpunk-blue/40 font-jp font-bold text-3xl tracking-widest mb-20"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.9 }}
-          transition={{ delay: 0.7, duration: 1 }}
-        >
-          アニメ
-        </motion.div>
-      </div>
-      
-      <div className="fixed bottom-0 left-0 w-24 h-full flex flex-col justify-between items-center z-10 pointer-events-none">
-        <motion.div 
-          className="writing-vertical text-anime-cyberpunk-blue/40 font-jp font-bold text-3xl tracking-widest mt-20"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.9 }}
-          transition={{ delay: 0.9, duration: 1 }}
-        >
-          日本語
-        </motion.div>
-        <motion.div 
-          className="writing-vertical text-anime-red/40 font-jp font-bold text-3xl tracking-widest mb-20"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.9 }}
-          transition={{ delay: 1.1, duration: 1 }}
-        >
-          漫画
-        </motion.div>
-      </div>
-      
-      {/* Add additional large Japanese text elements for more visual impact */}
-      <div className="fixed top-1/2 right-4 z-10 pointer-events-none transform -translate-y-1/2">
-        <motion.div 
-          className="writing-vertical text-anime-red/20 font-jp font-black text-6xl tracking-widest"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.7, y: [0, -10, 0] }}
+          animate={{ opacity: 0.7, y: [0, -20, 0] }}
           transition={{ 
             opacity: { delay: 1.3, duration: 1 },
-            y: { repeat: Infinity, duration: 6, ease: "easeInOut" }
+            y: { repeat: Infinity, duration: 10, ease: "easeInOut" }
           }}
         >
           サイバー
         </motion.div>
-      </div>
-      
-      <div className="fixed top-1/4 left-4 z-10 pointer-events-none">
+        
         <motion.div 
-          className="writing-vertical text-anime-cyberpunk-blue/20 font-jp font-black text-6xl tracking-widest"
+          className="absolute bottom-1/4 left-10 writing-vertical text-anime-cyberpunk-blue/20 font-jp font-black text-8xl tracking-widest"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.7, y: [0, 10, 0] }}
+          animate={{ opacity: 0.7, y: [0, 20, 0] }}
           transition={{ 
             opacity: { delay: 1.5, duration: 1 },
-            y: { repeat: Infinity, duration: 8, ease: "easeInOut" }
+            y: { repeat: Infinity, duration: 12, ease: "easeInOut" }
           }}
         >
           パンク
+        </motion.div>
+
+        <motion.div 
+          className="absolute top-10 left-1/2 transform -translate-x-1/2 text-anime-red/10 font-jp font-black text-9xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.3, scale: [1, 1.05, 1] }}
+          transition={{ 
+            opacity: { delay: 0.7, duration: 1 },
+            scale: { repeat: Infinity, duration: 8, ease: "easeInOut" }
+          }}
+        >
+          アニメ
+        </motion.div>
+
+        <motion.div 
+          className="absolute bottom-20 right-1/4 text-anime-cyberpunk-blue/15 font-jp font-black text-7xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5, rotate: [-1, 1, -1] }}
+          transition={{ 
+            opacity: { delay: 1.2, duration: 1 },
+            rotate: { repeat: Infinity, duration: 15, ease: "easeInOut" }
+          }}
+        >
+          カスパー
         </motion.div>
       </div>
       
