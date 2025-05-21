@@ -31,7 +31,16 @@ export interface Anime {
     from: string;
     to: string;
   };
-  type: string;
+  // Add missing properties that are used in AnimeDetails
+  title_japanese?: string;
+  studios?: {
+    mal_id: number;
+    name: string;
+  }[];
+  producers?: {
+    mal_id: number;
+    name: string;
+  }[];
 }
 
 export interface Manga {
@@ -51,24 +60,31 @@ export interface Manga {
   };
   synopsis: string;
   score: number;
-  volumes: number;
-  chapters: number;
+  volumes?: number;
+  chapters?: number;
   status: string;
   genres: {
     mal_id: number;
     name: string;
   }[];
-  published: {
+  authors?: {
+    mal_id: number;
+    name: string;
+    type: string;
+  }[];
+  published?: {
     from: string;
     to: string;
+    string: string;
   };
-  type: string;
+  title_japanese?: string;
 }
 
 export interface JikanResponse<T> {
   pagination: {
     last_visible_page: number;
     has_next_page: boolean;
+    current_page?: number;
     items: {
       count: number;
       total: number;
@@ -81,11 +97,11 @@ export interface JikanResponse<T> {
 // API functions
 
 // Get top anime
-export const getTopAnime = async (): Promise<Anime[]> => {
+export const getTopAnime = async (page = 1): Promise<Anime[]> => {
   try {
-    const response = await fetch(`${API_URL}/top/anime?limit=20`);
+    const response = await fetch(`${API_URL}/top/anime?page=${page}&limit=20`);
     const data: JikanResponse<Anime[]> = await response.json();
-    return data.data || [];
+    return data.data;
   } catch (error) {
     console.error("Error fetching top anime:", error);
     return [];
@@ -97,7 +113,7 @@ export const getSeasonalAnime = async (): Promise<Anime[]> => {
   try {
     const response = await fetch(`${API_URL}/seasons/now`);
     const data: JikanResponse<Anime[]> = await response.json();
-    return data.data || [];
+    return data.data;
   } catch (error) {
     console.error("Error fetching seasonal anime:", error);
     return [];
@@ -109,7 +125,7 @@ export const getAnimeById = async (id: number): Promise<Anime | null> => {
   try {
     const response = await fetch(`${API_URL}/anime/${id}`);
     const data = await response.json();
-    return data.data || null;
+    return data.data;
   } catch (error) {
     console.error(`Error fetching anime with ID ${id}:`, error);
     return null;
@@ -117,26 +133,68 @@ export const getAnimeById = async (id: number): Promise<Anime | null> => {
 };
 
 // Search anime
-export const searchAnime = async (query: string, page: number = 1): Promise<Anime[]> => {
+export const searchAnime = async (query: string, page = 1): Promise<{anime: Anime[], pagination: any}> => {
   try {
     const response = await fetch(`${API_URL}/anime?q=${encodeURIComponent(query)}&page=${page}&limit=20`);
     const data: JikanResponse<Anime[]> = await response.json();
-    return data.data || [];
+    return {
+      anime: data.data,
+      pagination: data.pagination
+    };
   } catch (error) {
     console.error("Error searching anime:", error);
-    return [];
+    return {
+      anime: [],
+      pagination: {
+        last_visible_page: 0,
+        has_next_page: false,
+        current_page: 1,
+        items: {
+          count: 0,
+          total: 0,
+          per_page: 20
+        }
+      }
+    };
   }
 };
 
 // Get top manga
-export const getTopManga = async (): Promise<Manga[]> => {
+export const getTopManga = async (page = 1): Promise<Manga[]> => {
   try {
-    const response = await fetch(`${API_URL}/top/manga?limit=20`);
+    const response = await fetch(`${API_URL}/top/manga?page=${page}&limit=20`);
     const data: JikanResponse<Manga[]> = await response.json();
-    return data.data || [];
+    return data.data;
   } catch (error) {
     console.error("Error fetching top manga:", error);
     return [];
+  }
+};
+
+// Search manga
+export const searchManga = async (query: string, page = 1): Promise<{manga: Manga[], pagination: any}> => {
+  try {
+    const response = await fetch(`${API_URL}/manga?q=${encodeURIComponent(query)}&page=${page}&limit=20`);
+    const data: JikanResponse<Manga[]> = await response.json();
+    return {
+      manga: data.data,
+      pagination: data.pagination
+    };
+  } catch (error) {
+    console.error("Error searching manga:", error);
+    return {
+      manga: [],
+      pagination: {
+        last_visible_page: 0,
+        has_next_page: false,
+        current_page: 1,
+        items: {
+          count: 0,
+          total: 0,
+          per_page: 20
+        }
+      }
+    };
   }
 };
 
@@ -145,21 +203,9 @@ export const getMangaById = async (id: number): Promise<Manga | null> => {
   try {
     const response = await fetch(`${API_URL}/manga/${id}`);
     const data = await response.json();
-    return data.data || null;
+    return data.data;
   } catch (error) {
     console.error(`Error fetching manga with ID ${id}:`, error);
     return null;
-  }
-};
-
-// Search manga
-export const searchManga = async (query: string, page: number = 1): Promise<Manga[]> => {
-  try {
-    const response = await fetch(`${API_URL}/manga?q=${encodeURIComponent(query)}&page=${page}&limit=20`);
-    const data: JikanResponse<Manga[]> = await response.json();
-    return data.data || [];
-  } catch (error) {
-    console.error("Error searching manga:", error);
-    return [];
   }
 };
