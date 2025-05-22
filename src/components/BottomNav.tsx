@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Home, Heart, Search as SearchIcon, Film, BookOpen, Menu, Package } from "lucide-react";
@@ -130,9 +131,10 @@ export default function BottomNav() {
 
   return (
     <motion.div 
-      className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-6 px-4"
-      initial={{ translateY: 0 }}
+      className="fixed bottom-6 left-1/2 z-50"
+      initial={{ translateX: "-50%", translateY: 0 }}
       animate={{ 
+        translateX: "-50%", 
         translateY: isVisible ? 0 : 100
       }}
       transition={{ duration: 0.3 }}
@@ -209,7 +211,7 @@ export default function BottomNav() {
             </AnimatePresence>
           </motion.ul>
           
-          {/* Enhanced glow effect for better UI */}
+          {/* Enhanced glow effect with more rounded corners */}
           <div className="absolute inset-0 -z-10 bg-gradient-to-r from-anime-cyberpunk-blue/10 via-anime-red/5 to-anime-cyberpunk-blue/10 rounded-full blur-md opacity-70"></div>
         </div>
       </motion.nav>
