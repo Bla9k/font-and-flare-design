@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import Layout from "@/components/Layout";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,6 +5,7 @@ import { toast } from "@/components/ui/use-toast";
 import { GachaSeriesCard, GachaBanner } from "@/types/anime";
 import { Package, Star, Gift, ChevronDown, ChevronUp, Plus, CircleCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 // Generate a large collection of reliable image URLs
 const generateReliableImageUrls = () => {
@@ -1572,7 +1572,7 @@ export default function Gacha() {
       {/* All Banners Modal with enhanced visuals */}
       {showBanners && (
         <motion.div 
-          className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
