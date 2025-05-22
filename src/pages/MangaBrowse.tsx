@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -28,9 +27,10 @@ export default function MangaBrowse() {
       const pageParam = Number(searchParams.get("page")) || 1;
       
       if (queryParam) {
-        const { manga, pagination } = await searchManga(queryParam, pageParam);
-        setMangaList(manga);
-        setTotalPages(pagination.last_visible_page);
+        // Keep using the original searchManga function as it's not been updated yet
+        const result = await searchManga(queryParam, pageParam);
+        setMangaList(result.manga);
+        setTotalPages(result.pagination.last_visible_page);
         setSearchMode(true);
       } else {
         const manga = await getTopManga(pageParam);

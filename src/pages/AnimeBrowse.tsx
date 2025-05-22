@@ -29,9 +29,13 @@ export default function AnimeBrowse() {
       const pageParam = Number(searchParams.get("page")) || 1;
       
       if (queryParam) {
-        const { anime, pagination } = await searchAnime(queryParam, pageParam);
-        setAnimeList(anime);
-        setTotalPages(pagination.last_visible_page);
+        // Updated to use the new searchAnime function that takes a params object
+        const searchResults = await searchAnime({ 
+          q: queryParam,
+          page: pageParam.toString() 
+        });
+        setAnimeList(searchResults);
+        setTotalPages(20); // Since we don't have pagination info now, default to 20
         setSearchMode(true);
       } else {
         const anime = await getTopAnime(pageParam);
