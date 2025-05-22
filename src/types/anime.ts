@@ -12,15 +12,25 @@ export interface Anime {
     mal_id: number;
     name: string;
   }[];
-  synopsis?: string;
-  score?: number;
-  episodes?: number;
-  status?: string;
-  rating?: string;
-  aired?: {
-    from?: string;
-    to?: string;
+  synopsis: string; // Changed from optional to required
+  score: number;    // Changed from optional to required
+  episodes: number; // Changed from optional to required
+  status: string;   // Changed from optional to required
+  rating: string;   // Changed from optional to required
+  aired: {
+    from: string;
+    to: string;
   };
+  // Additional fields that might be needed based on the API
+  title_japanese?: string;
+  studios?: {
+    mal_id: number;
+    name: string;
+  }[];
+  producers?: {
+    mal_id: number;
+    name: string;
+  }[];
 }
 
 export interface AnimeResponse {

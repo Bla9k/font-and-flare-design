@@ -3,6 +3,7 @@ import { ReactNode, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import { motion, AnimatePresence } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LayoutProps {
   children: ReactNode;
@@ -11,6 +12,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  const isMobile = useIsMobile();
   
   // Add a random glitch effect to the page occasionally
   useEffect(() => {
