@@ -211,7 +211,7 @@ export default function BottomNav() {
             </AnimatePresence>
           </motion.ul>
           
-          {/* Enhanced glow effect for better UI */}
+          {/* Enhanced glow effect with more rounded corners */}
           <div className="absolute inset-0 -z-10 bg-gradient-to-r from-anime-cyberpunk-blue/10 via-anime-red/5 to-anime-cyberpunk-blue/10 rounded-full blur-md opacity-70"></div>
         </div>
       </motion.nav>
