@@ -4,19 +4,25 @@ export interface Anime {
   title: string;
   images: {
     jpg: {
+      image_url: string;
+      small_image_url: string;
       large_image_url: string;
-      image_url?: string;
+    },
+    webp: {
+      image_url: string;
+      small_image_url: string;
+      large_image_url: string;
     }
   };
   genres?: {
     mal_id: number;
     name: string;
   }[];
-  synopsis: string; // Changed from optional to required
-  score: number;    // Changed from optional to required
-  episodes: number; // Changed from optional to required
-  status: string;   // Changed from optional to required
-  rating: string;   // Changed from optional to required
+  synopsis: string;
+  score: number;
+  episodes: number;
+  status: string;
+  rating: string;
   aired: {
     from: string;
     to: string;

@@ -17,6 +17,7 @@ export default function Discover() {
         const data = await response.json();
         
         if (data && data.data) {
+          // Ensure the data conforms to our Anime type
           setTrending(data.data.slice(0, 10));
         }
       } catch (error) {
