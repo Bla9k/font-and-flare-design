@@ -1,4 +1,3 @@
-
 // Base Jikan API URL
 const API_URL = "https://api.jikan.moe/v4";
 
@@ -133,29 +132,20 @@ export const getAnimeById = async (id: number): Promise<Anime | null> => {
 };
 
 // Search anime
-export const searchAnime = async (query: string, page = 1): Promise<{anime: Anime[], pagination: any}> => {
+export const searchAnime = async (params: Record<string, string>): Promise<Anime[]> => {
   try {
-    const response = await fetch(`${API_URL}/anime?q=${encodeURIComponent(query)}&page=${page}&limit=20`);
+    // Build the query string from the params object
+    const queryParams = Object.entries(params)
+      .filter(([_, value]) => value) // Filter out empty values
+      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+      .join('&');
+    
+    const response = await fetch(`${API_URL}/anime?${queryParams}&limit=20`);
     const data: JikanResponse<Anime[]> = await response.json();
-    return {
-      anime: data.data,
-      pagination: data.pagination
-    };
+    return data.data;
   } catch (error) {
     console.error("Error searching anime:", error);
-    return {
-      anime: [],
-      pagination: {
-        last_visible_page: 0,
-        has_next_page: false,
-        current_page: 1,
-        items: {
-          count: 0,
-          total: 0,
-          per_page: 20
-        }
-      }
-    };
+    return [];
   }
 };
 

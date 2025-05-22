@@ -35,13 +35,13 @@ export default function Search() {
     
     setLoading(true);
     try {
-      const searchParams = {
+      const searchParams: Record<string, string> = {
         q: query,
         ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v))
       };
       
       const data = await searchAnime(searchParams);
-      setResults(data || []);
+      setResults(data);
       
       if (!data || data.length === 0) {
         toast({
