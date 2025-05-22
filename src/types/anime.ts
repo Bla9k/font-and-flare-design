@@ -1,3 +1,4 @@
+
 export interface Anime {
   mal_id: number;
   title: string;
@@ -56,4 +57,26 @@ export interface GachaSeriesCard {
   colorScheme: string;
   coins?: number;
   rarity?: string; // New: SSR, SR, R
+  specialty?: string; // New: What this card specializes in
+  releaseDate?: string; // New: When this card was released
+  limited?: boolean; // New: Whether this card is limited edition
+  artist?: string; // New: Artist who created the card art
+  universe?: string; // New: Which anime universe this belongs to
+  powerLevel?: number; // New: Power level from 1-100
+  collectionValue?: number; // New: How valuable in collections
 }
+
+// New interface for Gacha banners
+export interface GachaBanner {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  featuredSeries: number[]; // IDs of featured series with higher pull rates
+  endDate: string;
+  colorScheme: string;
+  bannerType?: 'limited' | 'seasonal' | 'collaboration' | 'standard'; // Type of banner
+  boost?: number; // Rate boost percentage
+  bonusItems?: string[]; // Special bonus items
+}
+

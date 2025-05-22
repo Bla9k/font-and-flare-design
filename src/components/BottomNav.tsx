@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Heart, Search as SearchIcon, Film, BookOpen, Menu } from "lucide-react";
+import { Home, Heart, Search as SearchIcon, Film, BookOpen, Menu, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
@@ -30,7 +30,7 @@ const navItems = [
   {
     name: "Gacha",
     path: "/gacha",
-    icon: <Menu className="h-5 w-5" />,
+    icon: <Package className="h-5 w-5" />,
   },
   {
     name: "Favorites",
