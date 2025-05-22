@@ -2,29 +2,10 @@
 import { useState, useEffect, useRef } from "react";
 import Layout from "@/components/Layout";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search as SearchIcon, Film, BookOpen, X } from "lucide-react";
-import { CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
-import { cn } from "@/lib/utils";
+import { Search as SearchIcon, Film, BookOpen, X, SlidersHorizontal, Sparkles, Shuffle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
-
-// Mock results for the demo (in a real app, these would come from an API call)
-const mockAnimeResults = [
-  { mal_id: 1, title: "Attack on Titan", type: "anime", image_url: "https://cdn.myanimelist.net/images/anime/10/47347.jpg" },
-  { mal_id: 2, title: "Death Note", type: "anime", image_url: "https://cdn.myanimelist.net/images/anime/9/9453.jpg" },
-  { mal_id: 3, title: "Fullmetal Alchemist: Brotherhood", type: "anime", image_url: "https://cdn.myanimelist.net/images/anime/1223/96541.jpg" },
-];
-
-const mockMangaResults = [
-  { mal_id: 1, title: "Berserk", type: "manga", image_url: "https://cdn.myanimelist.net/images/manga/1/157897.jpg" },
-  { mal_id: 2, title: "Vagabond", type: "manga", image_url: "https://cdn.myanimelist.net/images/manga/1/259070.jpg" },
-  { mal_id: 3, title: "One Piece", type: "manga", image_url: "https://cdn.myanimelist.net/images/manga/2/253146.jpg" },
-];
-
-// Check for Japanese characters in a string
-function hasJapanese(str: string) {
-  return /[\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF\u3400-\u4DBF]/.test(str);
-}
+import { Anime } from "@/types/anime";
 
 export default function SearchPage() {
   const [open, setOpen] = useState(false);
@@ -32,10 +13,17 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showWaitlist, setShowWaitlist] = useState(false);
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [email, setEmail] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [searchType, setSearchType] = useState<"all" | "anime" | "manga">("all");
+  const [advancedFilters, setAdvancedFilters] = useState({
+    genres: "",
+    rating: "",
+    status: "airing",
+    sort: "popularity"
+  });
 
   // Load recent searches from localStorage on component mount
   useEffect(() => {
@@ -55,20 +43,50 @@ export default function SearchPage() {
   }, [open]);
 
   // Handle search submission
-  const handleSearch = () => {
-    if (!searchTerm.trim()) return;
+  const handleSearch = async () => {
+    if (!searchTerm.trim() && !advancedFilters.genres) return;
     
     setIsLoading(true);
     
     // Save to recent searches
-    if (!recentSearches.includes(searchTerm)) {
+    if (searchTerm && !recentSearches.includes(searchTerm)) {
       const newSearches = [searchTerm, ...recentSearches].slice(0, 5);
       setRecentSearches(newSearches);
       localStorage.setItem("recent_searches", JSON.stringify(newSearches));
     }
     
-    // For the demo we'll use mock data and add some delay to simulate API call
-    setTimeout(() => {
+    try {
+      // Build API URL based on search type and filters
+      let apiUrl = "";
+      if (searchTerm) {
+        if (searchType === "manga") {
+          apiUrl = `https://api.jikan.moe/v4/manga?q=${encodeURIComponent(searchTerm)}`;
+        } else {
+          apiUrl = `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(searchTerm)}`;
+        }
+      } else {
+        // Advanced search without keyword
+        const filters = [];
+        
+        if (advancedFilters.status) {
+          filters.push(`status=${advancedFilters.status}`);
+        }
+        
+        if (advancedFilters.genres) {
+          filters.push(`genres=${advancedFilters.genres}`);
+        }
+        
+        if (advancedFilters.rating) {
+          filters.push(`rating=${advancedFilters.rating}`);
+        }
+        
+        if (advancedFilters.sort) {
+          filters.push(`order_by=${advancedFilters.sort}`);
+        }
+        
+        apiUrl = `https://api.jikan.moe/v4/${searchType === "manga" ? "manga" : "anime"}?${filters.join("&")}`;
+      }
+      
       if (hasJapanese(searchTerm)) {
         // If search term contains Japanese characters, simulate AI-powered search
         toast({
@@ -76,40 +94,58 @@ export default function SearchPage() {
           description: "Translated Japanese query and searching...",
         });
       }
-      
-      // Filter mock results based on search type
-      let results: any[] = [];
-      
-      if (searchType === "all" || searchType === "anime") {
-        results = [...results, ...mockAnimeResults.filter(item => 
-          item.title.toLowerCase().includes(searchTerm.toLowerCase())
-        )];
-      }
-      
-      if (searchType === "all" || searchType === "manga") {
-        results = [...results, ...mockMangaResults.filter(item => 
-          item.title.toLowerCase().includes(searchTerm.toLowerCase())
-        )];
-      }
-      
-      // If no direct matches, pretend the AI found something
-      if (results.length === 0) {
-        if (searchType === "all" || searchType === "anime") {
-          results.push(mockAnimeResults[0]);
-        }
-        if (searchType === "all" || searchType === "manga") {
-          results.push(mockMangaResults[0]);
-        }
-        
+
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+
+      if (data && data.data) {
+        setSearchResults(data.data.slice(0, 10));
+      } else {
         toast({
-          title: "AI-Powered Results",
-          description: "Using semantic search to find related content",
+          title: "No Results",
+          description: "We couldn't find any matches for your search.",
+          variant: "destructive"
+        });
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error("Error during search:", error);
+      toast({
+        title: "Search Failed",
+        description: "There was an error completing your search. Please try again.",
+        variant: "destructive"
+      });
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Random anime search
+  const handleRandomSearch = async () => {
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch("https://api.jikan.moe/v4/random/anime");
+      const data = await response.json();
+      
+      if (data && data.data) {
+        setSearchResults([data.data]);
+        toast({
+          title: "Random Anime Found",
+          description: "Enjoy this random selection!",
         });
       }
-      
-      setSearchResults(results);
+    } catch (error) {
+      console.error("Error fetching random anime:", error);
+      toast({
+        title: "Random Search Failed",
+        description: "Unable to get a random anime. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   // Clear search
@@ -134,15 +170,24 @@ export default function SearchPage() {
       return;
     }
     
-    // In a real app, this would send the email to your backend
     toast({
       title: "Added to Waitlist",
-      description: "You'll be notified when AI Search is available!",
+      description: "You'll be notified when Casper AI Search is available!",
     });
     
     setShowWaitlist(false);
     setEmail("");
   };
+
+  // Toggle advanced search options
+  const toggleAdvancedSearch = () => {
+    setShowAdvancedSearch(!showAdvancedSearch);
+  };
+
+  // Check for Japanese characters in a string
+  function hasJapanese(str: string) {
+    return /[\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF00-\uFFEF\u4E00-\u9FAF\u3400-\u4DBF]/.test(str);
+  }
 
   // Japanese text animation for the search hints
   const textVariants = {
@@ -182,7 +227,7 @@ export default function SearchPage() {
           </motion.div>
           
           {/* Search bar */}
-          <div className="relative mx-auto max-w-lg mb-16">
+          <div className="relative mx-auto max-w-lg mb-8">
             <div className="relative">
               <input
                 ref={searchInputRef}
@@ -220,27 +265,124 @@ export default function SearchPage() {
               </button>
             </div>
             
-            <button 
-              onClick={handleSearch}
-              disabled={!searchTerm.trim() || isLoading}
-              className="mt-4 w-full bg-anime-red hover:bg-opacity-90 disabled:opacity-50 text-white font-display py-3 rounded-lg transition-all"
-            >
-              {isLoading ? 
-                <span className="flex items-center justify-center">
-                  <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-                  Searching...
-                </span> : 
-                "Search"
-              }
-            </button>
+            <div className="flex space-x-2 mt-4">
+              <button 
+                onClick={handleSearch}
+                disabled={(!searchTerm.trim() && !advancedFilters.genres) || isLoading}
+                className="flex-1 bg-anime-red hover:bg-opacity-90 disabled:opacity-50 text-white font-display py-3 rounded-lg transition-all"
+              >
+                {isLoading ? 
+                  <span className="flex items-center justify-center">
+                    <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                    Searching...
+                  </span> : 
+                  "Search"
+                }
+              </button>
+              
+              <button 
+                onClick={toggleAdvancedSearch}
+                className="px-4 py-3 bg-anime-gray hover:bg-anime-light-gray rounded-lg transition-colors"
+                title="Advanced Search"
+              >
+                <SlidersHorizontal className="h-5 w-5" />
+              </button>
+              
+              <button 
+                onClick={handleRandomSearch}
+                className="px-4 py-3 bg-anime-cyberpunk-blue hover:bg-opacity-90 rounded-lg transition-colors"
+                title="Random Anime"
+              >
+                <Shuffle className="h-5 w-5" />
+              </button>
+            </div>
             
-            {/* Waitlist CTA */}
-            <div className="mt-3 text-center">
+            {/* Advanced Search Options */}
+            <AnimatePresence>
+              {showAdvancedSearch && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="mt-4 overflow-hidden"
+                >
+                  <div className="bg-anime-gray/60 border border-anime-light-gray rounded-lg p-4">
+                    <h3 className="font-digital text-sm text-anime-cyberpunk-blue mb-3">ADVANCED FILTERS</h3>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1">Status</label>
+                        <select 
+                          className="w-full bg-anime-dark border border-anime-light-gray rounded px-3 py-2 text-sm"
+                          value={advancedFilters.status}
+                          onChange={(e) => setAdvancedFilters({...advancedFilters, status: e.target.value})}
+                        >
+                          <option value="airing">Airing</option>
+                          <option value="complete">Completed</option>
+                          <option value="upcoming">Upcoming</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1">Sort By</label>
+                        <select 
+                          className="w-full bg-anime-dark border border-anime-light-gray rounded px-3 py-2 text-sm"
+                          value={advancedFilters.sort}
+                          onChange={(e) => setAdvancedFilters({...advancedFilters, sort: e.target.value})}
+                        >
+                          <option value="popularity">Popularity</option>
+                          <option value="score">Rating</option>
+                          <option value="title">Title</option>
+                          <option value="start_date">Release Date</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1">Genre</label>
+                        <select 
+                          className="w-full bg-anime-dark border border-anime-light-gray rounded px-3 py-2 text-sm"
+                          value={advancedFilters.genres}
+                          onChange={(e) => setAdvancedFilters({...advancedFilters, genres: e.target.value})}
+                        >
+                          <option value="">Any</option>
+                          <option value="1">Action</option>
+                          <option value="2">Adventure</option>
+                          <option value="4">Comedy</option>
+                          <option value="8">Drama</option>
+                          <option value="10">Fantasy</option>
+                          <option value="22">Romance</option>
+                          <option value="24">Sci-Fi</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1">Rating</label>
+                        <select 
+                          className="w-full bg-anime-dark border border-anime-light-gray rounded px-3 py-2 text-sm"
+                          value={advancedFilters.rating}
+                          onChange={(e) => setAdvancedFilters({...advancedFilters, rating: e.target.value})}
+                        >
+                          <option value="">Any</option>
+                          <option value="g">G - All Ages</option>
+                          <option value="pg">PG - Children</option>
+                          <option value="pg13">PG-13 - Teens 13+</option>
+                          <option value="r17">R - 17+</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {/* Casper AI Coming Soon */}
+            <div className="mt-4 text-center">
               <button 
                 onClick={() => setShowWaitlist(true)}
-                className="text-anime-cyberpunk-blue hover:text-anime-red text-sm transition-colors"
+                className="inline-flex items-center gap-2 text-anime-cyberpunk-blue hover:text-anime-red text-sm transition-colors"
               >
-                Try our AI-powered search (early access waitlist)
+                <Sparkles className="h-4 w-4" />
+                Casper AI Search coming soon (join waitlist)
               </button>
             </div>
             
@@ -308,18 +450,18 @@ export default function SearchPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {searchResults.map((result) => (
                     <Link 
-                      key={`${result.type}-${result.mal_id}`}
-                      to={`/${result.type}/${result.mal_id}`}
+                      key={`${result.type || 'anime'}-${result.mal_id}`}
+                      to={`/${result.type || (searchType === "manga" ? "manga" : "anime")}/${result.mal_id}`}
                       className="bg-anime-gray/60 backdrop-blur-sm border border-anime-light-gray rounded-lg overflow-hidden hover:border-anime-red transition-colors"
                     >
                       <div className="relative h-48">
                         <img 
-                          src={result.image_url} 
+                          src={result.images?.jpg?.image_url || result.image_url || "https://via.placeholder.com/320x480?text=No+Image"} 
                           alt={result.title}
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute top-2 right-2 px-2 py-1 rounded bg-anime-dark/80 backdrop-blur-sm text-xs font-digital">
-                          {result.type === 'anime' ? (
+                          {(result.type === 'anime' || searchType === 'anime' || searchType === 'all') ? (
                             <div className="flex items-center text-anime-cyberpunk-blue">
                               <Film className="h-3 w-3 mr-1" />
                               ANIME
@@ -334,6 +476,15 @@ export default function SearchPage() {
                       </div>
                       <div className="p-4">
                         <h3 className="font-display font-medium">{result.title}</h3>
+                        {result.genres && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {result.genres.slice(0, 3).map((genre: any) => (
+                              <span key={genre.mal_id} className="text-xs px-2 py-0.5 rounded-full bg-anime-dark text-gray-300">
+                                {genre.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </Link>
                   ))}
@@ -397,7 +548,7 @@ export default function SearchPage() {
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-anime-gray border border-anime-light-gray rounded-lg w-full max-w-md p-6 m-4"
           >
-            <h3 className="text-xl font-display font-bold mb-1">AI Search Waitlist</h3>
+            <h3 className="text-xl font-display font-bold mb-1">Casper AI Search Waitlist</h3>
             <p className="text-gray-300 text-sm mb-6">
               Join the waitlist for early access to our AI-powered search, which can understand natural language and translate searches in any language.
             </p>

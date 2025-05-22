@@ -30,7 +30,7 @@ const navItems = [
   {
     name: "Gacha",
     path: "/gacha",
-    icon: <Menu className="h-5 w-5" />,  // Using Menu icon for Gacha
+    icon: <Menu className="h-5 w-5" />,
   },
   {
     name: "Favorites",
@@ -151,13 +151,13 @@ export default function BottomNav() {
         >
           <AnimatePresence>
             <motion.div 
-              className="bg-anime-dark/80 backdrop-blur-md p-6 rounded-lg border border-anime-red/30 max-w-xs"
+              className="bg-anime-dark/80 backdrop-blur-md p-6 rounded-lg border border-anime-cyberpunk-blue/30 max-w-xs"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.5 }}
             >
-              <h3 className="text-xl font-display text-anime-red mb-2">ジェスチャーコントロール</h3>
+              <h3 className="text-xl font-display text-anime-cyberpunk-blue mb-2">ジェスチャーコントロール</h3>
               <p className="text-sm font-digital text-gray-200">
                 Swipe left or right on screen to navigate between pages.
                 <br /><br />
@@ -171,7 +171,7 @@ export default function BottomNav() {
       )}
     
       <motion.div 
-        className="fixed bottom-3 left-1/2 z-50"
+        className="fixed bottom-6 left-1/2 z-50"
         initial={{ translateX: "-50%", translateY: 0 }}
         animate={{ 
           translateX: "-50%", 
@@ -182,12 +182,11 @@ export default function BottomNav() {
       >
         <motion.nav 
           className={cn(
-            "px-3 py-1 rounded-full bg-anime-dark/90 backdrop-blur-md border border-anime-red/30",
-            "shadow-[0_0_15px_0px_rgba(255,42,69,0.3)] cyberpunk-border",
+            "px-4 py-2 rounded-full bg-anime-dark/90 backdrop-blur-md",
+            "shadow-[0_0_20px_0px_rgba(0,120,255,0.3)]",
             "transition-all duration-300 ease-in-out",
-            isExpanded ? "w-[350px]" : "w-[200px]"
+            isExpanded ? "w-[350px]" : "w-[220px]"
           )}
-          style={{ height: "34px" }} // Even thinner nav bar
           drag="y"
           dragConstraints={{ top: 0, bottom: 0 }}
           onDragEnd={handleDrag}
@@ -195,9 +194,9 @@ export default function BottomNav() {
         >
           <div className="relative">
             {/* Glitch effect */}
-            <div className="absolute inset-0 bg-anime-red/5 opacity-20 rounded-full overflow-hidden">
+            <div className="absolute inset-0 bg-anime-cyberpunk-blue/5 opacity-20 rounded-full overflow-hidden">
               <div className="h-px w-full bg-anime-cyberpunk-blue/40 absolute top-[30%] animate-[glitch_2s_infinite]"></div>
-              <div className="h-px w-full bg-anime-red/40 absolute top-[60%] animate-[glitch_1.5s_infinite]"></div>
+              <div className="h-px w-full bg-anime-cyberpunk-blue/40 absolute top-[60%] animate-[glitch_1.5s_infinite]"></div>
             </div>
             
             <motion.ul 
@@ -221,9 +220,9 @@ export default function BottomNav() {
                       <Link 
                         to={item.path}
                         className={cn(
-                          "flex items-center px-1.5 py-1 transition-all duration-300",
+                          "flex items-center px-2 py-1.5 mx-1 transition-all duration-300",
                           isActive 
-                            ? "text-anime-red" 
+                            ? "text-anime-cyberpunk-blue" 
                             : "text-gray-400 hover:text-gray-200"
                         )}
                         onClick={(e) => {
@@ -232,17 +231,17 @@ export default function BottomNav() {
                         }}
                       >
                         <div className={cn(
-                          "relative p-1 rounded-lg transition-all duration-300",
-                          isActive && "bg-anime-dark/70 shadow-[0_0_8px_0px_rgba(255,42,69,0.3)]"
+                          "relative p-1.5 rounded-lg transition-all duration-300",
+                          isActive && "bg-anime-dark/70 shadow-[0_0_8px_0px_rgba(0,120,255,0.3)]"
                         )}>
                           {item.icon}
                           {isActive && (
-                            <span className="absolute top-0 right-0 h-1.5 w-1.5 bg-anime-red rounded-full animate-pulse" />
+                            <span className="absolute top-0 right-0 h-1.5 w-1.5 bg-anime-cyberpunk-blue rounded-full animate-pulse" />
                           )}
                         </div>
                         {isExpanded && (
                           <motion.span 
-                            className="text-xs ml-1 font-digital tracking-wider whitespace-nowrap overflow-hidden"
+                            className="text-xs ml-1.5 font-digital tracking-wider whitespace-nowrap overflow-hidden"
                             initial={{ opacity: 0, width: 0 }}
                             animate={{ opacity: 1, width: "auto" }}
                             transition={{ duration: 0.2 }}
@@ -273,7 +272,7 @@ export default function BottomNav() {
                 key={item.path}
                 className={cn(
                   "h-1 rounded-full transition-all duration-300",
-                  location.pathname === item.path ? "w-3 bg-anime-red" : "w-1 bg-gray-600"
+                  location.pathname === item.path ? "w-3 bg-anime-cyberpunk-blue" : "w-1 bg-gray-600"
                 )}
               />
             ))}

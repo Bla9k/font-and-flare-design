@@ -14,7 +14,7 @@ export interface Anime {
       large_image_url: string;
     }
   };
-  genres?: {
+  genres: {
     mal_id: number;
     name: string;
   }[];
