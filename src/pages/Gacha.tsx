@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Package, Star, Trophy, Sparkles } from 'lucide-react';
 
-// Mock data for gacha cards
+// Mock data for gacha cards with valid Pexels images
 const mockCards = [
   {
     id: 1,
     name: "Levi Ackerman",
     rarity: "UR",
-    image: "https://images.pexels.com/photos/15814000/pexels-photo-15814000.jpeg",
+    image: "https://images.pexels.com/photos/2832432/pexels-photo-2832432.jpeg",
     series: "Attack on Titan",
     power: 95,
   },
@@ -19,7 +19,7 @@ const mockCards = [
     id: 2,
     name: "Monkey D. Luffy",
     rarity: "SSR",
-    image: "https://images.pexels.com/photos/15812957/pexels-photo-15812957.jpeg",
+    image: "https://images.pexels.com/photos/1545590/pexels-photo-1545590.jpeg",
     series: "One Piece",
     power: 88,
   },
@@ -27,11 +27,26 @@ const mockCards = [
     id: 3,
     name: "Naruto Uzumaki",
     rarity: "SR",
-    image: "https://images.pexels.com/photos/15813012/pexels-photo-15813012.jpeg",
+    image: "https://images.pexels.com/photos/1374510/pexels-photo-1374510.jpeg",
     series: "Naruto",
     power: 82,
   },
-  // Add more mock cards as needed
+  {
+    id: 4,
+    name: "Goku",
+    rarity: "UR",
+    image: "https://images.pexels.com/photos/1547813/pexels-photo-1547813.jpeg",
+    series: "Dragon Ball",
+    power: 98,
+  },
+  {
+    id: 5,
+    name: "Mikasa Ackerman",
+    rarity: "SSR",
+    image: "https://images.pexels.com/photos/2681319/pexels-photo-2681319.jpeg",
+    series: "Attack on Titan",
+    power: 87,
+  }
 ];
 
 const rarityColors = {
