@@ -1,4 +1,3 @@
-
 export interface Anime {
   mal_id: number;
   title: string;
@@ -51,9 +50,10 @@ export interface AnimeResponse {
 export interface GachaSeriesCard {
   id: number;
   title: string;
-  imageUrl: string;
   description: string;
-  rating: number; // Out of 5
-  colorScheme: "yellow" | "orange" | "purple" | "green" | "blue" | "red";
+  imageUrl: string;
+  rating: number;
+  colorScheme: string;
   coins?: number;
+  rarity?: string; // New: SSR, SR, R
 }

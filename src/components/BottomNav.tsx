@@ -141,9 +141,9 @@ export default function BottomNav() {
     >
       <motion.nav 
         className={cn(
-          "px-4 py-2 rounded-full bg-anime-dark/90 backdrop-blur-md",
-          "shadow-lg shadow-anime-cyberpunk-blue/20",
-          "border border-anime-light-gray/20",
+          "px-4 py-2 rounded-full bg-gradient-to-r from-anime-dark/95 via-anime-gray/95 to-anime-dark/95 backdrop-blur-md",
+          "shadow-lg shadow-black/20",
+          "border border-anime-cyberpunk-blue/30",
           "transition-all duration-300 ease-in-out",
           isExpanded ? "w-[340px]" : "w-[260px]"
         )}
@@ -183,7 +183,7 @@ export default function BottomNav() {
                     >
                       <div className={cn(
                         "relative p-1.5 rounded-lg transition-all duration-300",
-                        isActive && "bg-anime-dark/70 shadow-[0_0_8px_0px_rgba(0,120,255,0.3)]"
+                        isActive && "bg-anime-dark/70 shadow-[0_0_12px_2px_rgba(0,240,255,0.25)]"
                       )}>
                         {item.icon}
                         {isActive && (
@@ -211,8 +211,8 @@ export default function BottomNav() {
             </AnimatePresence>
           </motion.ul>
           
-          {/* Subtle glow effect */}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-anime-cyberpunk-blue/5 via-anime-red/5 to-anime-cyberpunk-blue/5 rounded-full blur-md opacity-50"></div>
+          {/* Enhanced glow effect for better UI */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-anime-cyberpunk-blue/10 via-anime-red/5 to-anime-cyberpunk-blue/10 rounded-full blur-md opacity-70"></div>
         </div>
       </motion.nav>
       
@@ -226,12 +226,15 @@ export default function BottomNav() {
           className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-1"
         >
           {navItems.map((item) => (
-            <div 
+            <motion.div 
               key={item.path}
               className={cn(
                 "h-1 rounded-full transition-all duration-300",
-                location.pathname === item.path ? "w-3 bg-anime-cyberpunk-blue" : "w-1 bg-gray-600"
+                location.pathname === item.path 
+                  ? "w-3 bg-anime-cyberpunk-blue shadow-[0_0_8px_2px_rgba(0,240,255,0.4)]" 
+                  : "w-1 bg-gray-600"
               )}
+              whileHover={location.pathname !== item.path ? { scale: 1.5, backgroundColor: "#A2C4FF" } : {}}
             />
           ))}
         </motion.div>
