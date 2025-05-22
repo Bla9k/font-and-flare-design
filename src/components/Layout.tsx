@@ -1,9 +1,10 @@
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import BottomNav from "./BottomNav";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import BootAnimation from "./BootAnimation";
 
 interface LayoutProps {
   children: ReactNode;
@@ -13,6 +14,21 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
   const isMobile = useIsMobile();
+  const [showLogo, setShowLogo] = useState(true);
+  
+  // Hide logo on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setShowLogo(false);
+      } else {
+        setShowLogo(true);
+      }
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   
   // Add a random glitch effect to the page occasionally
   useEffect(() => {
@@ -42,6 +58,8 @@ export default function Layout({ children }: LayoutProps) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
+      <BootAnimation />
+      
       {/* Visual effects for cyberpunk feel */}
       <div className="scanline"></div>
       <div className="noise"></div>
@@ -86,28 +104,33 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </div>
       
-      {/* Casper Logo in top left - Only shown on home page */}
+      {/* Casper Logo in top left - Hide on scroll */}
       {isHomePage && (
-        <div className="fixed top-5 left-5 z-50">
-          <motion.div 
-            className="flex flex-col items-center"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            <div className="relative group cursor-pointer" title="CASPER v1.0.0">
-              <div className="text-anime-red font-display text-2xl tracking-[0.3em] animate-text-flicker">CASPER</div>
-              <div className="absolute top-full left-0 w-full bg-anime-dark/80 p-2 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                <span className="text-xs font-digital text-anime-cyberpunk-blue">v1.0.0</span>
+        <AnimatePresence>
+          {showLogo && (
+            <motion.div 
+              className="fixed top-5 left-5 z-50"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex flex-col items-center">
+                <div className="relative group cursor-pointer" title="CASPER v1.0.0">
+                  <div className="text-anime-red font-display text-2xl tracking-[0.3em] animate-text-flicker">CASPER</div>
+                  <div className="absolute top-full left-0 w-full bg-anime-dark/80 p-2 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                    <span className="text-xs font-digital text-anime-cyberpunk-blue">v1.0.0</span>
+                  </div>
+                </div>
+                <div className="h-0.5 w-full bg-anime-red/50 mt-1"></div>
+                <div className="text-xs font-digital text-gray-400 tracking-[0.2em] mt-1">アニメパラダイス</div>
               </div>
-            </div>
-            <div className="h-0.5 w-full bg-anime-red/50 mt-1"></div>
-            <div className="text-xs font-digital text-gray-400 tracking-[0.2em] mt-1">アニメパラダイス</div>
-          </motion.div>
-        </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
 
-      {/* Enhanced Japanese Typography Elements - Made larger and more expressive */}
+      {/* Enhanced Japanese Typography Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-10">
         {/* Larger floating typography */}
         <motion.div 

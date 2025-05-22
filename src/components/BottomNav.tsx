@@ -1,9 +1,9 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Home, Heart, Search as SearchIcon, Film, BookOpen, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence, PanInfo, useAnimation } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
 
 const navItems = [
@@ -45,8 +45,6 @@ export default function BottomNav() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [showTutorial, setShowTutorial] = useState(true);
-  const controls = useAnimation();
-  const navRef = useRef<HTMLDivElement>(null);
 
   // Check if this is the first visit
   useEffect(() => {
@@ -127,158 +125,117 @@ export default function BottomNav() {
     };
   }, [location.pathname]);
 
-  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.y < -30) {
-      setIsExpanded(true);
-    } else if (info.offset.y > 30) {
-      setIsExpanded(false);
-    }
-  };
-
   const handleToggle = () => {
     setIsExpanded(!isExpanded);
   };
 
   return (
-    <>
-      {/* Show tutorial toast on first visit */}
-      {showTutorial && (
-        <motion.div 
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <AnimatePresence>
-            <motion.div 
-              className="bg-anime-dark/80 backdrop-blur-md p-6 rounded-lg border border-anime-cyberpunk-blue/30 max-w-xs"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h3 className="text-xl font-display text-anime-cyberpunk-blue mb-2">ジェスチャーコントロール</h3>
-              <p className="text-sm font-digital text-gray-200">
-                Swipe left or right on screen to navigate between pages.
-                <br /><br />
-                Swipe up on the bottom bar to expand it.
-                <br /><br />
-                Swipe down to collapse it.
-              </p>
-            </motion.div>
-          </AnimatePresence>
-        </motion.div>
-      )}
-    
-      <motion.div 
-        className="fixed bottom-6 left-1/2 z-50"
-        initial={{ translateX: "-50%", translateY: 0 }}
-        animate={{ 
-          translateX: "-50%", 
-          translateY: isVisible ? 0 : 100
-        }}
-        transition={{ duration: 0.3 }}
-        ref={navRef}
+    <motion.div 
+      className="fixed bottom-6 left-1/2 z-50"
+      initial={{ translateX: "-50%", translateY: 0 }}
+      animate={{ 
+        translateX: "-50%", 
+        translateY: isVisible ? 0 : 100
+      }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.nav 
+        className={cn(
+          "px-4 py-2 rounded-full bg-anime-dark/90 backdrop-blur-md",
+          "shadow-lg shadow-anime-cyberpunk-blue/20",
+          "border border-anime-light-gray/20",
+          "transition-all duration-300 ease-in-out",
+          isExpanded ? "w-[340px]" : "w-[260px]"
+        )}
+        onClick={handleToggle}
       >
-        <motion.nav 
-          className={cn(
-            "px-4 py-2 rounded-full bg-anime-dark/90 backdrop-blur-md",
-            "shadow-[0_0_20px_0px_rgba(0,120,255,0.3)]",
-            "transition-all duration-300 ease-in-out",
-            isExpanded ? "w-[350px]" : "w-[220px]"
-          )}
-          drag="y"
-          dragConstraints={{ top: 0, bottom: 0 }}
-          onDragEnd={handleDrag}
-          onClick={handleToggle}
-        >
-          <div className="relative">
-            {/* Glitch effect */}
-            <div className="absolute inset-0 bg-anime-cyberpunk-blue/5 opacity-20 rounded-full overflow-hidden">
-              <div className="h-px w-full bg-anime-cyberpunk-blue/40 absolute top-[30%] animate-[glitch_2s_infinite]"></div>
-              <div className="h-px w-full bg-anime-cyberpunk-blue/40 absolute top-[60%] animate-[glitch_1.5s_infinite]"></div>
-            </div>
-            
-            <motion.ul 
-              className="flex justify-center items-center relative z-10"
-              layout
-            >
-              <AnimatePresence>
-                {navItems.map((item) => {
-                  const isActive = location.pathname === item.path || 
-                                (item.path !== "/" && location.pathname.startsWith(item.path));
-                                
-                  return (
-                    <motion.li 
-                      key={item.path} 
-                      className="relative"
-                      initial={!isExpanded && item.name !== "Home" ? { opacity: 0, width: 0 } : { opacity: 1 }}
-                      animate={isExpanded || item.name === "Home" ? { opacity: 1, width: "auto" } : { opacity: 0, width: 0 }}
-                      exit={{ opacity: 0, width: 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Link 
-                        to={item.path}
-                        className={cn(
-                          "flex items-center px-2 py-1.5 mx-1 transition-all duration-300",
-                          isActive 
-                            ? "text-anime-cyberpunk-blue" 
-                            : "text-gray-400 hover:text-gray-200"
-                        )}
-                        onClick={(e) => {
-                          // Don't close the menu if link is clicked
-                          e.stopPropagation();
-                        }}
-                      >
-                        <div className={cn(
-                          "relative p-1.5 rounded-lg transition-all duration-300",
-                          isActive && "bg-anime-dark/70 shadow-[0_0_8px_0px_rgba(0,120,255,0.3)]"
-                        )}>
-                          {item.icon}
-                          {isActive && (
-                            <span className="absolute top-0 right-0 h-1.5 w-1.5 bg-anime-cyberpunk-blue rounded-full animate-pulse" />
-                          )}
-                        </div>
-                        {isExpanded && (
-                          <motion.span 
-                            className="text-xs ml-1.5 font-digital tracking-wider whitespace-nowrap overflow-hidden"
-                            initial={{ opacity: 0, width: 0 }}
-                            animate={{ opacity: 1, width: "auto" }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            {item.name}
-                          </motion.span>
-                        )}
-                      </Link>
-                    </motion.li>
-                  );
-                })}
-              </AnimatePresence>
-            </motion.ul>
-          </div>
-        </motion.nav>
-        
-        {/* Page navigation indicator */}
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={location.pathname}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: -25 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-1"
+        <div className="relative">
+          <motion.ul 
+            className="flex justify-center items-center relative z-10"
+            layout
           >
-            {navItems.map((item, index) => (
-              <div 
-                key={item.path}
-                className={cn(
-                  "h-1 rounded-full transition-all duration-300",
-                  location.pathname === item.path ? "w-3 bg-anime-cyberpunk-blue" : "w-1 bg-gray-600"
-                )}
-              />
-            ))}
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
-    </>
+            <AnimatePresence>
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.path || 
+                              (item.path !== "/" && location.pathname.startsWith(item.path));
+                              
+                return (
+                  <motion.li 
+                    key={item.path} 
+                    className="relative"
+                    initial={!isExpanded && item.name !== "Home" && item.name !== "Search" ? { opacity: 0, width: 0 } : { opacity: 1 }}
+                    animate={isExpanded || item.name === "Home" || item.name === "Search" ? { opacity: 1, width: "auto" } : { opacity: 0, width: 0 }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Link 
+                      to={item.path}
+                      className={cn(
+                        "flex items-center px-2 py-1.5 mx-1 transition-all duration-300",
+                        isActive 
+                          ? "text-anime-cyberpunk-blue" 
+                          : "text-gray-400 hover:text-gray-200"
+                      )}
+                      onClick={(e) => {
+                        // Don't close the menu if link is clicked
+                        e.stopPropagation();
+                      }}
+                    >
+                      <div className={cn(
+                        "relative p-1.5 rounded-lg transition-all duration-300",
+                        isActive && "bg-anime-dark/70 shadow-[0_0_8px_0px_rgba(0,120,255,0.3)]"
+                      )}>
+                        {item.icon}
+                        {isActive && (
+                          <motion.span 
+                            className="absolute top-0 right-0 h-1.5 w-1.5 bg-anime-cyberpunk-blue rounded-full"
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          />
+                        )}
+                      </div>
+                      {isExpanded && (
+                        <motion.span 
+                          className="text-xs ml-1.5 font-digital tracking-wider whitespace-nowrap overflow-hidden"
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {item.name}
+                        </motion.span>
+                      )}
+                    </Link>
+                  </motion.li>
+                );
+              })}
+            </AnimatePresence>
+          </motion.ul>
+          
+          {/* Subtle glow effect */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-anime-cyberpunk-blue/5 via-anime-red/5 to-anime-cyberpunk-blue/5 rounded-full blur-md opacity-50"></div>
+        </div>
+      </motion.nav>
+      
+      {/* Page navigation indicator */}
+      <AnimatePresence mode="wait">
+        <motion.div 
+          key={location.pathname}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 0.8, y: -20 }}
+          exit={{ opacity: 0, y: 20 }}
+          className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-1"
+        >
+          {navItems.map((item) => (
+            <div 
+              key={item.path}
+              className={cn(
+                "h-1 rounded-full transition-all duration-300",
+                location.pathname === item.path ? "w-3 bg-anime-cyberpunk-blue" : "w-1 bg-gray-600"
+              )}
+            />
+          ))}
+        </motion.div>
+      </AnimatePresence>
+    </motion.div>
   );
 }

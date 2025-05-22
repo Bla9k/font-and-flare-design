@@ -46,3 +46,14 @@ export interface AnimeResponse {
     has_next_page: boolean;
   };
 }
+
+// Gacha series card interface based on the image reference
+export interface GachaSeriesCard {
+  id: number;
+  title: string;
+  imageUrl: string;
+  description: string;
+  rating: number; // Out of 5
+  colorScheme: "yellow" | "orange" | "purple" | "green" | "blue" | "red";
+  coins?: number;
+}
