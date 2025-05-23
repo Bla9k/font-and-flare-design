@@ -24,13 +24,22 @@ export default function GachaCard({ card, isNew, onClick }: GachaCardProps) {
     UR: "border-yellow-400",
   };
   
-  // Fallback image to use when there's an error
-  const fallbackImage = "https://images.unsplash.com/photo-1579546929518-9e396f3cc809";
+  // Safer image URL handling - ensure we have a valid URL
+  const imageUrl = card.imageUrl && card.imageUrl.startsWith('http') 
+    ? card.imageUrl 
+    : "https://images.unsplash.com/photo-1579546929518-9e396f3cc809";
   
   // Handle image load error
   const handleImageError = () => {
     setImageError(true);
     console.error(`Failed to load image for card: ${card.title}`);
+    // Try to load fallback image from Unsplash
+    toast({
+      variant: "destructive",
+      title: "Image Error",
+      description: `Failed to load image for ${card.title}`,
+      duration: 3000,
+    });
   };
   
   return (
@@ -63,7 +72,7 @@ export default function GachaCard({ card, isNew, onClick }: GachaCardProps) {
           </div>
         ) : (
           <img
-            src={card.imageUrl || fallbackImage}
+            src={imageUrl}
             alt={card.title}
             className={cn(
               "w-full h-full object-cover transition-all duration-500",
