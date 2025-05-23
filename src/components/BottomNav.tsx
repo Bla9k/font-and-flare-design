@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Heart, Search as SearchIcon, Film, BookOpen, Menu, Package } from "lucide-react";
+import { Home, Heart, Search as SearchIcon, Film, BookOpen, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
@@ -41,7 +41,6 @@ const navItems = [
 
 export default function BottomNav() {
   const location = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [showTutorial, setShowTutorial] = useState(true);
@@ -55,7 +54,7 @@ export default function BottomNav() {
       setTimeout(() => {
         toast({
           title: "Gesture Controls",
-          description: "Swipe left/right to navigate pages. Swipe up on bottom bar to expand. Swipe down to close.",
+          description: "Swipe left/right to navigate pages.",
           duration: 5000,
         });
         localStorage.setItem('seen-gesture-tutorial', 'true');
@@ -71,8 +70,6 @@ export default function BottomNav() {
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         // Scrolling down - hide the nav
         setIsVisible(false);
-        // Also collapse the nav when scrolling down
-        setIsExpanded(false);
       } else if (currentScrollY < lastScrollY) {
         // Scrolling up - show the nav
         setIsVisible(true);
@@ -125,10 +122,6 @@ export default function BottomNav() {
     };
   }, [location.pathname]);
 
-  const handleToggle = () => {
-    setIsExpanded(!isExpanded);
-  };
-
   return (
     <motion.div 
       className="fixed bottom-6 left-1/2 z-50"
@@ -144,79 +137,54 @@ export default function BottomNav() {
           "px-4 py-2 rounded-full bg-gradient-to-r from-anime-dark/95 via-anime-gray/95 to-anime-dark/95 backdrop-blur-md",
           "shadow-lg shadow-black/20",
           "border border-anime-cyberpunk-blue/30",
-          "transition-all duration-300 ease-in-out",
-          isExpanded ? "w-[340px]" : "w-[260px]"
+          "w-[340px]"
         )}
-        onClick={handleToggle}
       >
         <div className="relative">
-          <motion.ul 
-            className="flex justify-center items-center relative z-10"
-            layout
-          >
-            <AnimatePresence>
-              {navItems.map((item) => {
-                const isActive = location.pathname === item.path || 
-                              (item.path !== "/" && location.pathname.startsWith(item.path));
-                              
-                return (
-                  <motion.li 
-                    key={item.path} 
-                    className="relative"
-                    initial={!isExpanded && item.name !== "Home" && item.name !== "Search" ? { opacity: 0, width: 0 } : { opacity: 1 }}
-                    animate={isExpanded || item.name === "Home" || item.name === "Search" ? { opacity: 1, width: "auto" } : { opacity: 0, width: 0 }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.2 }}
+          <ul className="flex justify-center items-center gap-1 md:gap-2">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path || 
+                            (item.path !== "/" && location.pathname.startsWith(item.path));
+                            
+              return (
+                <li key={item.path} className="relative">
+                  <Link 
+                    to={item.path}
+                    className={cn(
+                      "flex flex-col items-center px-2 py-1 transition-all duration-300",
+                      isActive 
+                        ? "text-anime-cyberpunk-blue" 
+                        : "text-gray-400 hover:text-gray-200"
+                    )}
                   >
-                    <Link 
-                      to={item.path}
-                      className={cn(
-                        "flex items-center px-2 py-1.5 mx-1 transition-all duration-300",
-                        isActive 
-                          ? "text-anime-cyberpunk-blue" 
-                          : "text-gray-400 hover:text-gray-200"
-                      )}
-                      onClick={(e) => {
-                        // Don't close the menu if link is clicked
-                        e.stopPropagation();
-                      }}
-                    >
-                      <div className={cn(
-                        "relative p-1.5 rounded-lg transition-all duration-300",
-                        isActive && "bg-anime-dark/70 shadow-[0_0_12px_2px_rgba(0,240,255,0.25)]"
-                      )}>
-                        {item.icon}
-                        {isActive && (
-                          <motion.span 
-                            className="absolute top-0 right-0 h-1.5 w-1.5 bg-anime-cyberpunk-blue rounded-full"
-                            animate={{ opacity: [0.5, 1, 0.5] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                          />
-                        )}
-                      </div>
-                      {isExpanded && (
+                    <div className={cn(
+                      "relative p-1 rounded-lg transition-all duration-300",
+                      isActive && "bg-anime-dark/70 shadow-[0_0_12px_2px_rgba(0,240,255,0.25)]"
+                    )}>
+                      {item.icon}
+                      {isActive && (
                         <motion.span 
-                          className="text-xs ml-1.5 font-digital tracking-wider whitespace-nowrap overflow-hidden"
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: "auto" }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {item.name}
-                        </motion.span>
+                          className="absolute top-0 right-0 h-1.5 w-1.5 bg-anime-cyberpunk-blue rounded-full"
+                          animate={{ opacity: [0.5, 1, 0.5] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
                       )}
-                    </Link>
-                  </motion.li>
-                );
-              })}
-            </AnimatePresence>
-          </motion.ul>
+                    </div>
+                    <span className="text-[10px] font-digital tracking-wider">
+                      {item.name}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
           
           {/* Enhanced glow effect for better UI */}
           <div className="absolute inset-0 -z-10 bg-gradient-to-r from-anime-cyberpunk-blue/10 via-anime-red/5 to-anime-cyberpunk-blue/10 rounded-full blur-md opacity-70"></div>
         </div>
       </motion.nav>
       
-      {/* Page navigation indicator */}
+      {/* Page navigation indicator - centered */}
       <AnimatePresence mode="wait">
         <motion.div 
           key={location.pathname}
