@@ -1,41 +1,42 @@
 
 import { Home, Heart, Search, Film, BookOpen, Package } from "lucide-react";
+import React from "react";
 
 export type NavItem = {
   name: string;
   path: string;
-  icon: React.ReactNode;
+  icon: React.ComponentType<any>;
 };
 
-export const navItems = [
+export const navItems: NavItem[] = [
   {
     name: "Home",
     path: "/",
-    icon: <Home className="h-5 w-5" />,
+    icon: Home,
   },
   {
     name: "Search",
     path: "/search",
-    icon: <Search className="h-5 w-5" />,
+    icon: Search,
   },
   {
     name: "Anime",
     path: "/anime",
-    icon: <Film className="h-5 w-5" />,
+    icon: Film,
   },
   {
     name: "Manga",
     path: "/manga",
-    icon: <BookOpen className="h-5 w-5" />,
+    icon: BookOpen,
   },
   {
     name: "Gacha",
     path: "/gacha",
-    icon: <Package className="h-5 w-5" />,
+    icon: Package,
   },
   {
     name: "Favorites",
     path: "/favorites",
-    icon: <Heart className="h-5 w-5" />,
+    icon: Heart,
   },
 ];

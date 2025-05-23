@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
 interface NavItemProps {
   name: string;
   path: string;
-  icon: React.ReactNode;
+  icon: React.ComponentType<any>;
   isActive: boolean;
 }
 
-export default function NavItem({ name, path, icon, isActive }: NavItemProps) {
+export default function NavItem({ name, path, icon: Icon, isActive }: NavItemProps) {
   return (
     <li className="relative">
       <Link 
@@ -26,7 +26,7 @@ export default function NavItem({ name, path, icon, isActive }: NavItemProps) {
           "relative p-1 rounded-lg transition-all duration-300",
           isActive && "bg-anime-dark/70 shadow-[0_0_12px_2px_rgba(0,240,255,0.25)]"
         )}>
-          {icon}
+          <Icon className="h-5 w-5" />
           {isActive && (
             <motion.span 
               className="absolute top-0 right-0 h-1.5 w-1.5 bg-anime-cyberpunk-blue rounded-full"
