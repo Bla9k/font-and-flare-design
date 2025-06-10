@@ -15,6 +15,7 @@ import Favorites from "./pages/Favorites";
 import NotFound from "./pages/NotFound";
 import Manga from "./pages/Manga";
 import MangaDetails from "./pages/MangaDetails";
+import MangaAbout from "./pages/MangaAbout";
 import Search from "./pages/Search";
 import Gacha from "./pages/Gacha";
 
@@ -33,6 +34,7 @@ const AnimatedRoutes = () => {
         <Route path="/anime/:id" element={<AnimeDetails />} />
         <Route path="/manga" element={<MangaBrowse />} />
         <Route path="/manga/:id" element={<MangaDetails />} />
+        <Route path="/manga/about" element={<MangaAbout />} />
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/search" element={<Search />} />
         <Route path="/gacha" element={<Gacha />} />
