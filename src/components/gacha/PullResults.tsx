@@ -27,6 +27,17 @@ export default function PullResults({ results, onClose }: PullResultsProps) {
     SR: results.filter(r => r.card.rarity === 'SR').length,
     R: results.filter(r => r.card.rarity === 'R').length,
   };
+
+  // Map card rarity to GachaCard rarity
+  const mapRarity = (cardRarity: string) => {
+    switch (cardRarity) {
+      case 'UR': return 'legendary';
+      case 'SSR': return 'epic';
+      case 'SR': return 'rare';
+      case 'R': return 'common';
+      default: return 'common';
+    }
+  };
   
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center p-4">
@@ -70,11 +81,22 @@ export default function PullResults({ results, onClose }: PullResultsProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
+            onClick={() => setSelectedCard(index)}
+            className="cursor-pointer"
           >
             <GachaCard 
-              card={result.card} 
-              isNew={true}
-              onClick={() => setSelectedCard(index)}
+              anime={{
+                mal_id: result.card.id,
+                title: result.card.title,
+                images: {
+                  jpg: {
+                    large_image_url: result.card.imageUrl
+                  }
+                },
+                score: result.card.rating
+              }}
+              rarity={mapRarity(result.card.rarity)}
+              isRevealed={true}
             />
           </motion.div>
         ))}
