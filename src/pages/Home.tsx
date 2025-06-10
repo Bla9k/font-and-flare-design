@@ -1,10 +1,11 @@
-
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getSeasonalAnime, getTopAnime, Anime } from "@/api/jikan";
 import Layout from "@/components/Layout";
 import HeroSection from "@/components/HeroSection";
 import AnimeCard from "@/components/AnimeCard";
+import GameAdBanner from "@/components/ads/GameAdBanner";
+import ThemeSelector from "@/components/theme/ThemeSelector";
 import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 import { ArrowRight, TrendingUp, Clock, Star } from "lucide-react";
@@ -67,6 +68,11 @@ export default function Home() {
       <HeroSection />
       
       <div className="container mx-auto px-4 py-8 space-y-16">
+        {/* Theme Selector */}
+        <section className="flex justify-end">
+          <ThemeSelector />
+        </section>
+
         {/* Featured Categories Tabs */}
         <section className="mt-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
@@ -216,6 +222,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Eye of Existence Advertisement */}
+        <GameAdBanner />
 
         {/* Genre Section */}
         <section>

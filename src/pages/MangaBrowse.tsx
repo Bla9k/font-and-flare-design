@@ -1,237 +1,223 @@
+
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/Layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import MangaDetailsPanel from "@/components/manga/MangaDetailsPanel";
 import { toast } from "@/components/ui/use-toast";
-import { Manga, searchManga, getTopManga } from "@/api/jikan";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Star, TrendingUp } from "lucide-react";
+
+// Mock manga data - in a real app this would come from an API
+const mockMangaData = [
+  {
+    mal_id: 1,
+    title: "Berserk",
+    title_japanese: "ベルセルク",
+    images: { jpg: { large_image_url: "https://cdn.myanimelist.net/images/manga/1/157897.jpg" } },
+    synopsis: "Guts, a former mercenary now known as the 'Black Swordsman,' is out for revenge. After a tumultuous childhood, he finally finds someone he respects and believes he can trust, only to have everything fall apart when this person takes away everything important to Guts for the purpose of fulfilling his own desires.",
+    score: 9.4,
+    scored_by: 323470,
+    rank: 1,
+    popularity: 2,
+    status: "Publishing",
+    genres: [
+      { mal_id: 1, name: "Action" }, 
+      { mal_id: 2, name: "Adventure" }, 
+      { mal_id: 8, name: "Drama" }
+    ],
+    authors: [{ mal_id: 1868, name: "Miura, Kentarou" }],
+    chapters: 364,
+    volumes: 41,
+    published: { string: "Aug 25, 1989 to ?" }
+  },
+  {
+    mal_id: 2,
+    title: "Vagabond",
+    title_japanese: "バガボンド",
+    images: { jpg: { large_image_url: "https://cdn.myanimelist.net/images/manga/1/259070.jpg" } },
+    synopsis: "In 16th century Japan, Shinmen Takezou is a wild, rough young man, in both his appearance and his actions.",
+    score: 9.2,
+    scored_by: 157302,
+    rank: 2,
+    popularity: 4,
+    status: "On Hiatus",
+    genres: [
+      { mal_id: 1, name: "Action" }, 
+      { mal_id: 2, name: "Adventure" }, 
+      { mal_id: 8, name: "Drama" }
+    ],
+    authors: [{ mal_id: 1867, name: "Inoue, Takehiko" }],
+    chapters: 327,
+    volumes: 37,
+    published: { string: "Sep 3, 1998 to ?" }
+  },
+  {
+    mal_id: 3,
+    title: "One Piece",
+    title_japanese: "ワンピース",
+    images: { jpg: { large_image_url: "https://cdn.myanimelist.net/images/manga/2/253146.jpg" } },
+    synopsis: "Gol D. Roger, a man referred to as the 'King of the Pirates,' is set to be executed by the World Government.",
+    score: 9.1,
+    scored_by: 258139,
+    rank: 3,
+    popularity: 1,
+    status: "Publishing",
+    genres: [
+      { mal_id: 1, name: "Action" }, 
+      { mal_id: 2, name: "Adventure" }, 
+      { mal_id: 4, name: "Comedy" }
+    ],
+    authors: [{ mal_id: 1881, name: "Oda, Eiichiro" }],
+    chapters: null,
+    volumes: null,
+    published: { string: "Jul 22, 1997 to ?" }
+  }
+];
 
 export default function MangaBrowse() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [mangaList, setMangaList] = useState<Manga[]>([]);
+  const [mangaList, setMangaList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [searchMode, setSearchMode] = useState(searchParams.has("q"));
+  const [selectedManga, setSelectedManga] = useState<any>(null);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchManga();
-  }, [currentPage, searchParams]);
-
-  const fetchManga = async () => {
-    setLoading(true);
-    try {
-      const queryParam = searchParams.get("q");
-      const pageParam = Number(searchParams.get("page")) || 1;
-      
-      if (queryParam) {
-        // Keep using the original searchManga function as it's not been updated yet
-        const result = await searchManga(queryParam, pageParam);
-        setMangaList(result.manga);
-        setTotalPages(result.pagination.last_visible_page);
-        setSearchMode(true);
-      } else {
-        const manga = await getTopManga(pageParam);
-        setMangaList(manga);
-        setTotalPages(20); // Assuming 20 pages for top manga
-        setSearchMode(false);
-      }
-    } catch (error) {
-      console.error("Error fetching manga:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch manga data. Please try again later.",
-        variant: "destructive"
-      });
-    } finally {
+    // Simulate API loading
+    const timer = setTimeout(() => {
+      setMangaList(mockMangaData);
       setLoading(false);
-    }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleMangaClick = (manga: any) => {
+    setSelectedManga(manga);
+    setIsPanelOpen(true);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      setSearchParams({ q: searchTerm, page: "1" });
-      setCurrentPage(1);
-    } else {
-      setSearchParams({ page: "1" });
-      setCurrentPage(1);
-      setSearchMode(false);
-    }
-  };
-
-  const changePage = (newPage: number) => {
-    if (newPage < 1 || newPage > totalPages) return;
-    
-    const params: { q?: string, page: string } = { page: newPage.toString() };
-    if (searchMode && searchTerm) {
-      params.q = searchTerm;
-    }
-    
-    setSearchParams(params);
-    setCurrentPage(newPage);
-    window.scrollTo(0, 0);
-  };
+  const filteredManga = mangaList.filter(manga =>
+    manga.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    manga.title_japanese?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h1 className="text-3xl md:text-4xl font-display font-bold relative flex items-center gap-2">
-            <span className="text-anime-cyberpunk-blue">[</span> 
-            Browse Manga
-            <span className="text-anime-cyberpunk-blue">_</span>
-            <span className="text-anime-red">]</span>
-          </h1>
+        {/* Header */}
+        <div className="mb-8">
+          <motion.h1 
+            className="text-3xl font-display font-bold mb-4"
+            style={{ color: 'var(--theme-text)' }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <span style={{ color: 'var(--theme-primary)' }}>#</span> Browse Manga
+          </motion.h1>
           
-          <form onSubmit={handleSearch} className="flex w-full md:w-96 relative">
-            <Input
+          {/* Search */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-3 h-5 w-5" style={{ color: 'var(--theme-text-muted)' }} />
+            <input
               type="text"
               placeholder="Search manga..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border-anime-cyberpunk-blue/50 bg-anime-dark/80 backdrop-blur-md"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2"
+              style={{
+                backgroundColor: 'var(--theme-card)',
+                borderColor: 'var(--theme-accent)',
+                color: 'var(--theme-text)',
+                borderWidth: '1px'
+              }}
             />
-            <Button 
-              type="submit" 
-              variant="ghost" 
-              className="absolute right-0 top-0 h-full text-anime-cyberpunk-blue hover:text-white"
-            >
-              <Search className="h-5 w-5" />
-            </Button>
-          </form>
-        </div>
-
-        <div className="bg-anime-gray/20 backdrop-blur-sm border border-anime-light-gray/50 p-4 md:p-6 rounded-md mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-display font-semibold flex items-center">
-              <span className="h-4 w-1 bg-anime-red mr-2"></span>
-              {searchMode ? `Search Results: ${searchTerm}` : "Top Manga"}
-            </h2>
-            <div className="font-digital text-sm text-anime-cyberpunk-blue">
-              // PAGE {currentPage} OF {totalPages}
-            </div>
           </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {[...Array(20)].map((_, i) => (
-                <div key={i} className="h-[300px] bg-anime-gray/40 animate-pulse rounded-md"></div>
-              ))}
-            </div>
-          ) : (
-            <>
-              {mangaList && mangaList.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                  {mangaList.map((manga) => (
-                    <div 
-                      key={manga.mal_id} 
-                      className="group relative overflow-hidden rounded-lg border border-anime-light-gray bg-anime-gray/60 backdrop-blur-sm hover:border-anime-cyberpunk-blue/60 transition-all duration-300"
-                    >
-                      <div className="absolute inset-0 overflow-hidden">
-                        <img 
-                          src={manga.images.jpg.image_url} 
-                          alt={manga.title}
-                          className="w-full h-full object-cover opacity-20 transform group-hover:scale-110 transition-transform duration-700"
-                        />
-                      </div>
-
-                      <div className="absolute inset-0 bg-gradient-to-t from-anime-dark via-anime-dark/80 to-transparent"></div>
-
-                      <div className="relative z-10 p-4 h-full flex flex-col">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-lg font-display font-medium line-clamp-2 group-hover:text-anime-cyberpunk-blue transition-colors">
-                            {manga.title}
-                          </h3>
-                          {manga.score > 0 && (
-                            <div className="px-2 py-0.5 bg-anime-red text-white text-sm rounded font-digital">
-                              {manga.score.toFixed(1)}
-                            </div>
-                          )}
-                        </div>
-
-                        <p className="text-gray-400 text-xs mb-2 line-clamp-3">{manga.synopsis}</p>
-                        
-                        <div className="mt-auto flex flex-wrap gap-1">
-                          {manga.genres?.slice(0, 3).map((genre) => (
-                            <span 
-                              key={genre.mal_id} 
-                              className="px-1.5 py-0.5 text-xs bg-anime-dark border border-anime-light-gray rounded"
-                            >
-                              {genre.name}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-anime-cyberpunk-blue font-digital text-xl mb-2">NO_RESULTS_FOUND</p>
-                  <p className="text-gray-400">Try a different search term or browse the top manga</p>
-                </div>
-              )}
-            </>
-          )}
         </div>
 
-        {/* Pagination */}
-        {!loading && mangaList.length > 0 && (
-          <div className="flex justify-center mt-8 mb-16">
-            <div className="flex items-center gap-2 bg-anime-dark/80 backdrop-blur-md p-2 rounded-md border border-anime-cyberpunk-blue/30">
-              <Button
-                onClick={() => changePage(currentPage - 1)}
-                disabled={currentPage === 1}
-                variant="ghost"
-                className="h-8 w-8 p-0 text-anime-cyberpunk-blue"
+        {/* Loading State */}
+        {loading && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {[...Array(10)].map((_, i) => (
+              <div 
+                key={i} 
+                className="h-80 rounded-lg animate-pulse"
+                style={{ backgroundColor: 'var(--theme-accent)' }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Manga Grid */}
+        {!loading && (
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            {filteredManga.map((manga, index) => (
+              <motion.div
+                key={manga.mal_id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="group cursor-pointer"
+                onClick={() => handleMangaClick(manga)}
               >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum = 0;
-                
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-                
-                return (
-                  <Button
-                    key={i}
-                    onClick={() => changePage(pageNum)}
-                    variant={currentPage === pageNum ? "default" : "outline"}
-                    className={`h-8 w-8 p-0 font-digital ${
-                      currentPage === pageNum 
-                        ? 'bg-anime-cyberpunk-blue text-anime-dark' 
-                        : 'text-anime-cyberpunk-blue border-anime-cyberpunk-blue/50'
-                    }`}
-                  >
-                    {pageNum}
-                  </Button>
-                );
-              })}
-              
-              <Button
-                onClick={() => changePage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                variant="ghost"
-                className="h-8 w-8 p-0 text-anime-cyberpunk-blue"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+                <div className="relative rounded-lg overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                  <div className="aspect-[3/4] relative">
+                    <img 
+                      src={manga.images.jpg.large_image_url} 
+                      alt={manga.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Score Badge */}
+                    {manga.score && (
+                      <div className="absolute top-2 right-2 flex items-center bg-black/70 backdrop-blur-sm px-2 py-1 rounded-full">
+                        <Star className="h-3 w-3 text-yellow-400 mr-1 fill-current" />
+                        <span className="text-white text-xs font-bold">{manga.score.toFixed(1)}</span>
+                      </div>
+                    )}
+                    
+                    {/* Rank Badge */}
+                    {manga.rank && manga.rank <= 10 && (
+                      <div className="absolute top-2 left-2 flex items-center bg-gradient-to-r from-yellow-500 to-yellow-600 px-2 py-1 rounded-full">
+                        <TrendingUp className="h-3 w-3 text-white mr-1" />
+                        <span className="text-white text-xs font-bold">#{manga.rank}</span>
+                      </div>
+                    )}
+                    
+                    {/* Title Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                      <h3 className="text-white font-bold text-sm mb-1 line-clamp-2">
+                        {manga.title}
+                      </h3>
+                      <p className="text-gray-300 text-xs">
+                        {manga.status} • {manga.chapters ? `${manga.chapters} chapters` : 'Ongoing'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+
+        {/* No Results */}
+        {!loading && filteredManga.length === 0 && (
+          <div className="text-center py-12">
+            <p style={{ color: 'var(--theme-text-muted)' }}>No manga found matching your search.</p>
           </div>
         )}
       </div>
+
+      {/* Manga Details Panel */}
+      <MangaDetailsPanel 
+        manga={selectedManga}
+        isOpen={isPanelOpen}
+        onClose={() => setIsPanelOpen(false)}
+      />
     </Layout>
   );
 }

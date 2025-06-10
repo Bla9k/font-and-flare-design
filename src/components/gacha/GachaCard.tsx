@@ -1,150 +1,130 @@
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { Star, AlertCircle } from "lucide-react";
-import { GachaCard as GachaCardType } from "@/api/gachaService";
-import { toast } from "@/components/ui/use-toast";
+import { motion } from 'framer-motion';
+import { Star } from 'lucide-react';
 
 interface GachaCardProps {
-  card: GachaCardType;
-  isNew?: boolean;
-  onClick?: () => void;
+  anime: {
+    mal_id: number;
+    title: string;
+    images: {
+      jpg: {
+        large_image_url: string;
+      };
+    };
+    score?: number;
+  };
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  isRevealed?: boolean;
 }
 
-export default function GachaCard({ card, isNew, onClick }: GachaCardProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  
-  // Rarity colors
-  const rarityColors = {
-    R: "border-gray-400",
-    SR: "border-blue-400",
-    SSR: "border-purple-500",
-    UR: "border-yellow-400",
+const rarityColors = {
+  common: '#9CA3AF',
+  rare: '#3B82F6',
+  epic: '#8B5CF6',
+  legendary: '#F59E0B'
+};
+
+const rarityGlow = {
+  common: 'rgba(156, 163, 175, 0.3)',
+  rare: 'rgba(59, 130, 246, 0.5)',
+  epic: 'rgba(139, 92, 246, 0.5)',
+  legendary: 'rgba(245, 158, 11, 0.7)'
+};
+
+export default function GachaCard({ anime, rarity, isRevealed = false }: GachaCardProps) {
+  const rarityStars = {
+    common: 1,
+    rare: 2,
+    epic: 3,
+    legendary: 4
   };
-  
-  // Safer image URL handling - ensure we have a valid URL
-  const imageUrl = card.imageUrl && card.imageUrl.startsWith('http') 
-    ? card.imageUrl 
-    : "https://images.unsplash.com/photo-1579546929518-9e396f3cc809";
-  
-  // Handle image load error
-  const handleImageError = () => {
-    setImageError(true);
-    console.error(`Failed to load image for card: ${card.title}`);
-    // Try to load fallback image from Unsplash
-    toast({
-      variant: "destructive",
-      title: "Image Error",
-      description: `Failed to load image for ${card.title}`,
-      duration: 3000,
-    });
-  };
-  
+
   return (
     <motion.div
-      className={cn(
-        "relative flex flex-col rounded-lg overflow-hidden cursor-pointer transform transition-all duration-300",
-        "hover:scale-105 hover:shadow-xl hover:z-10",
-        "border-2",
-        rarityColors[card.rarity]
-      )}
-      whileHover={{ 
-        y: -5,
-        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+      className="relative w-48 h-64 rounded-lg overflow-hidden"
+      initial={{ opacity: 0, scale: 0.8, rotateY: 180 }}
+      animate={{ 
+        opacity: 1, 
+        scale: 1, 
+        rotateY: isRevealed ? 0 : 180 
       }}
-      onClick={onClick}
-      layout
+      transition={{ 
+        duration: 0.6,
+        type: "spring",
+        stiffness: 100
+      }}
+      style={{
+        boxShadow: `0 0 20px ${rarityGlow[rarity]}`,
+        border: `2px solid ${rarityColors[rarity]}`
+      }}
     >
-      {/* Image container */}
-      <div className="relative w-full h-48 overflow-hidden bg-anime-dark">
-        {!imageLoaded && !imageError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-anime-gray animate-pulse">
-            <span className="sr-only">Loading...</span>
+      {/* Card Back (when not revealed) */}
+      {!isRevealed && (
+        <div 
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ backgroundColor: 'var(--theme-card)' }}
+        >
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+                 style={{ backgroundColor: `var(--theme-primary)` }}>
+              <span className="text-2xl font-bold" style={{ color: 'var(--theme-background)' }}>?</span>
+            </div>
+            <div className="text-sm font-digital" style={{ color: 'var(--theme-text-muted)' }}>
+              MYSTERY
+            </div>
           </div>
-        )}
-        
-        {imageError ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-anime-gray">
-            <AlertCircle className="w-8 h-8 text-gray-400 mb-2" />
-            <p className="text-xs text-gray-400">Image unavailable</p>
-          </div>
-        ) : (
-          <img
-            src={imageUrl}
-            alt={card.title}
-            className={cn(
-              "w-full h-full object-cover transition-all duration-500",
-              !imageLoaded && "opacity-0",
-              "bg-anime-gray"
-            )}
-            onLoad={() => setImageLoaded(true)}
-            onError={handleImageError}
+        </div>
+      )}
+
+      {/* Card Front (when revealed) */}
+      {isRevealed && (
+        <div className="relative w-full h-full">
+          {/* Anime Cover Art */}
+          <img 
+            src={anime.images.jpg.large_image_url} 
+            alt={anime.title}
+            className="w-full h-full object-cover"
           />
-        )}
-        
-        {/* Rarity badge */}
-        <div className={cn(
-          "absolute top-2 right-2 px-2 py-0.5 text-xs font-bold text-white rounded",
-          {
-            "bg-gray-500": card.rarity === 'R',
-            "bg-blue-500": card.rarity === 'SR',
-            "bg-purple-500": card.rarity === 'SSR',
-            "bg-yellow-500": card.rarity === 'UR',
-          }
-        )}>
-          {card.rarity}
-        </div>
-        
-        {/* New badge */}
-        {isNew && (
-          <div className="absolute top-2 left-2 px-2 py-0.5 text-xs font-bold text-white bg-red-500 rounded">
-            NEW
+          
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+          
+          {/* Rarity Indicator */}
+          <div className="absolute top-2 right-2 flex space-x-1">
+            {[...Array(rarityStars[rarity])].map((_, i) => (
+              <Star 
+                key={i} 
+                className="h-4 w-4 fill-current" 
+                style={{ color: rarityColors[rarity] }}
+              />
+            ))}
           </div>
-        )}
-        
-        {/* Power level */}
-        <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/70 text-white text-xs rounded">
-          PL: {card.powerLevel}
-        </div>
-        
-        {/* Limited badge */}
-        {card.limited && (
-          <div className="absolute bottom-2 left-2 px-2 py-0.5 text-xs font-bold bg-gradient-to-r from-amber-500 to-yellow-400 text-white rounded">
-            LIMITED
+          
+          {/* Title and Score */}
+          <div className="absolute bottom-0 left-0 right-0 p-3">
+            <h3 className="text-white font-bold text-sm mb-1 line-clamp-2">
+              {anime.title}
+            </h3>
+            {anime.score && (
+              <div className="flex items-center text-xs text-gray-300">
+                <Star className="h-3 w-3 mr-1 fill-current text-yellow-400" />
+                {anime.score.toFixed(1)}
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      
-      {/* Card details */}
-      <div className={cn(
-        "p-3 flex-grow bg-gradient-to-b from-anime-dark to-anime-gray"
-      )}>
-        <h3 className="font-medium text-sm mb-1 line-clamp-1 text-white">{card.title}</h3>
-        
-        {card.originalTitle && (
-          <p className="text-xs text-gray-400 mb-2 line-clamp-1 font-digital">{card.originalTitle}</p>
-        )}
-        
-        <div className="flex items-center mb-2">
-          {[...Array(5)].map((_, i) => (
-            <Star 
-              key={i}
-              className={cn(
-                "w-3 h-3", 
-                i < Math.round(card.rating / 2) ? "text-yellow-400 fill-yellow-400" : "text-gray-600"
-              )}
-            />
-          ))}
-          <span className="ml-1 text-xs text-gray-400">{card.rating.toFixed(1)}</span>
+          
+          {/* Rarity Badge */}
+          <div 
+            className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold uppercase"
+            style={{ 
+              backgroundColor: rarityColors[rarity],
+              color: 'white'
+            }}
+          >
+            {rarity}
+          </div>
         </div>
-        
-        <div className="flex justify-between items-center text-xs text-gray-400">
-          <span>{card.specialty}</span>
-          <span>{card.universe}</span>
-        </div>
-      </div>
+      )}
     </motion.div>
   );
 }
