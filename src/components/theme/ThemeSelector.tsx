@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Palette, Check } from 'lucide-react';
@@ -82,22 +81,34 @@ interface ThemeSelectorProps {
   onThemeChange?: (themeId: string) => void;
 }
 
-export default function ThemeSelector({ currentTheme = 'dark', onThemeChange }: ThemeSelectorProps) {
+export default function ThemeSelector({ currentTheme = '', onThemeChange }: ThemeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedTheme, setSelectedTheme] = useState(currentTheme);
+  const [selectedTheme, setSelectedTheme] = useState(currentTheme || '');
 
+  // System preference for first load
   useEffect(() => {
-    // Apply initial theme
-    applyTheme(selectedTheme);
+    let userTheme = localStorage.getItem('selected-theme');
+    if (userTheme) {
+      setSelectedTheme(userTheme);
+      applyTheme(userTheme, false);
+    } else {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const defaultTheme = prefersDark ? "dark" : "light";
+      setSelectedTheme(defaultTheme);
+      applyTheme(defaultTheme, false);
+    }
   }, []);
 
-  const applyTheme = (themeId: string) => {
+  const applyTheme = (themeId: string, animate = true) => {
     const theme = themes.find(t => t.id === themeId);
-    
+    const root = document.documentElement;
+
+    if (animate) {
+      // Add animating class to body for smooth transitions
+      document.body.classList.add('theme-transition');
+      setTimeout(() => { document.body.classList.remove('theme-transition'); }, 520);
+    }
     if (theme) {
-      const root = document.documentElement;
-      
-      // Apply CSS variables
       root.style.setProperty('--theme-primary', theme.colors.primary);
       root.style.setProperty('--theme-secondary', theme.colors.secondary);
       root.style.setProperty('--theme-background', theme.colors.background);
@@ -105,18 +116,18 @@ export default function ThemeSelector({ currentTheme = 'dark', onThemeChange }: 
       root.style.setProperty('--theme-card', theme.colors.card);
       root.style.setProperty('--theme-text', theme.colors.text);
       root.style.setProperty('--theme-text-muted', theme.colors.textMuted);
-      
-      // Update anime color classes
       root.style.setProperty('--anime-red', theme.colors.secondary);
       root.style.setProperty('--anime-blue', theme.colors.primary);
       root.style.setProperty('--anime-dark', theme.colors.background);
       root.style.setProperty('--anime-gray', theme.colors.accent);
       root.style.setProperty('--anime-light-gray', theme.colors.card);
       root.style.setProperty('--anime-cyberpunk-blue', theme.colors.primary);
-      
-      // Add theme class to body
+
       document.body.className = document.body.className.replace(/theme-\w+/g, '');
       document.body.classList.add(`theme-${themeId}`);
+    } else {
+      // System default: remove any theme- classes
+      document.body.className = document.body.className.replace(/theme-\w+/g, '');
     }
   };
 
@@ -124,19 +135,27 @@ export default function ThemeSelector({ currentTheme = 'dark', onThemeChange }: 
     setSelectedTheme(themeId);
     applyTheme(themeId);
     onThemeChange?.(themeId);
-    
-    // Save to localStorage
     localStorage.setItem('selected-theme', themeId);
-    
+    setIsOpen(false);
+  };
+
+  // System default option
+  const handleSystemDefault = () => {
+    localStorage.removeItem('selected-theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const defaultTheme = prefersDark ? "dark" : "light";
+    setSelectedTheme(defaultTheme);
+    applyTheme(defaultTheme);
+    onThemeChange?.(defaultTheme);
     setIsOpen(false);
   };
 
   return (
-    <div className="relative">
+    <div className="relative z-[120]">
       <Button
         onClick={() => setIsOpen(!isOpen)}
         variant="outline"
-        className="border-anime-light-gray/50 hover:bg-anime-gray/50"
+        className="border-anime-light-gray/50 hover:bg-anime-gray/60 transition-colors"
         style={{
           backgroundColor: `var(--theme-card)`,
           borderColor: `var(--theme-accent)`,
@@ -150,12 +169,12 @@ export default function ThemeSelector({ currentTheme = 'dark', onThemeChange }: 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            initial={{ opacity: 0, y: 10, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute top-full mt-2 right-0 w-80 border rounded-lg shadow-xl z-50"
+            exit={{ opacity: 0, y: 10, scale: 0.96 }}
+            className="absolute top-full mt-2 right-0 w-80 border rounded-lg shadow-2xl z-[120]"
             style={{
-              backgroundColor: `var(--theme-card)`,
+              background: `rgba(18,18,18,0.99)`,
               borderColor: `var(--theme-accent)`,
               color: `var(--theme-text)`
             }}
@@ -164,7 +183,6 @@ export default function ThemeSelector({ currentTheme = 'dark', onThemeChange }: 
               <h3 className="text-lg font-display font-bold mb-4" style={{ color: `var(--theme-primary)` }}>
                 Choose Theme
               </h3>
-              
               <div className="space-y-3">
                 {themes.map((theme) => (
                   <motion.button
@@ -172,15 +190,15 @@ export default function ThemeSelector({ currentTheme = 'dark', onThemeChange }: 
                     onClick={() => handleThemeSelect(theme.id)}
                     className={`w-full p-3 rounded-lg border transition-all text-left ${
                       selectedTheme === theme.id
-                        ? 'border-current bg-opacity-10'
-                        : 'border-opacity-30 hover:border-opacity-50'
+                        ? 'border-current bg-opacity-15'
+                        : 'border-opacity-30 hover:border-opacity-60'
                     }`}
                     style={{
                       borderColor: selectedTheme === theme.id ? theme.colors.primary : `var(--theme-accent)`,
-                      backgroundColor: selectedTheme === theme.id ? `${theme.colors.primary}20` : 'transparent'
+                      backgroundColor: selectedTheme === theme.id ? `${theme.colors.primary}22` : 'rgba(0,0,0,0.00)'
                     }}
                     whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileTap={{ scale: 0.97 }}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
@@ -190,7 +208,7 @@ export default function ThemeSelector({ currentTheme = 'dark', onThemeChange }: 
                               <div
                                 key={index}
                                 className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: color }}
+                                style={{ backgroundColor: color, border: "1px solid #222" }}
                               />
                             ))}
                           </div>
@@ -198,29 +216,36 @@ export default function ThemeSelector({ currentTheme = 'dark', onThemeChange }: 
                         </div>
                         <p className="text-sm" style={{ color: `var(--theme-text-muted)` }}>{theme.description}</p>
                       </div>
-                      
                       {selectedTheme === theme.id && (
                         <Check className="h-5 w-5" style={{ color: theme.colors.primary }} />
                       )}
                     </div>
                   </motion.button>
                 ))}
+                <motion.button
+                  onClick={handleSystemDefault}
+                  className="w-full mt-1 p-3 rounded-lg border border-dashed border-anime-cyberpunk-blue transition-all text-left hover:bg-anime-cyberpunk-blue/10"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <span className="font-medium">System Default</span>
+                  <span className="ml-2 text-xs text-anime-cyberpunk-blue">(match OS)</span>
+                </motion.button>
               </div>
-              
               <div className="mt-4 pt-4 border-t" style={{ borderColor: `var(--theme-accent)` }}>
                 <p className="text-xs" style={{ color: `var(--theme-text-muted)` }}>
-                  Theme changes are applied instantly and saved to your preferences.
+                  Theme changes are smooth and saved to your preferences.
                 </p>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Backdrop */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[110]"
+          style={{ background: 'transparent' }}
           onClick={() => setIsOpen(false)}
         />
       )}

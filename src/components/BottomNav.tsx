@@ -13,47 +13,48 @@ export default function BottomNav() {
 
   return (
     <motion.div 
-      className="fixed bottom-6 left-1/2 z-50"
-      initial={{ translateX: "-50%", translateY: 0 }}
+      className="fixed left-1/2 bottom-5 z-[110] md:bottom-7"
+      initial={{ translateX: "-50%", translateY: 100 }}
       animate={{ 
         translateX: "-50%", 
         translateY: isVisible ? 0 : 100
       }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.35, type: "spring", stiffness: 70 }}
     >
       <motion.nav 
         className={cn(
-          "px-4 py-2 rounded-full bg-gradient-to-r from-anime-dark/95 via-anime-gray/95 to-anime-dark/95 backdrop-blur-md",
-          "shadow-lg shadow-black/20",
-          "border border-anime-cyberpunk-blue/30",
-          "w-[340px]"
+          "w-[340px] max-w-[97vw] mx-auto px-6 py-2 rounded-full relative",
+          // Opaque glass effect
+          "bg-anime-dark bg-opacity-95 backdrop-blur-md",
+          // Glow border
+          "border-2 border-anime-cyberpunk-blue/40 shadow-2xl shadow-anime-cyberpunk-blue/5",
+          // Animation
+          "transition-all duration-300"
         )}
       >
-        <div className="relative">
-          <ul className="flex justify-center items-center gap-1 md:gap-2">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path || 
-                            (item.path !== "/" && location.pathname.startsWith(item.path));
-                            
-              return (
-                <NavItem 
-                  key={item.path}
-                  name={item.name}
-                  path={item.path}
-                  icon={item.icon}
-                  isActive={isActive}
-                />
-              );
-            })}
-          </ul>
-          
-          {/* Enhanced glow effect for better UI */}
-          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-anime-cyberpunk-blue/10 via-anime-red/5 to-anime-cyberpunk-blue/10 rounded-full blur-md opacity-70"></div>
-        </div>
+        {/* Gradient, subtle glow */}
+        <div className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-anime-cyberpunk-blue/10 via-anime-red/5 to-anime-cyberpunk-blue/10 blur-sm pointer-events-none" />
+        <ul className="flex justify-between items-center gap-1 md:gap-2">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path || (
+              item.path !== "/" && location.pathname.startsWith(item.path)
+            );
+            return (
+              <NavItem 
+                key={item.path}
+                name={item.name}
+                path={item.path}
+                icon={item.icon}
+                isActive={isActive}
+              />
+            );
+          })}
+        </ul>
       </motion.nav>
-      
-      {/* Page navigation indicator - centered */}
-      <PageIndicator navItems={navItems} />
+      {/* Precise navigation indicator */}
+      <div className="relative flex justify-center">
+        <PageIndicator navItems={navItems} />
+      </div>
     </motion.div>
   );
 }
