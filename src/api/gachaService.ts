@@ -60,12 +60,12 @@ export const initGachaData = async (): Promise<void> => {
     if (animeCache.length === 0) {
       console.log('Fetching anime data for gacha...');
       // Fetch top anime and popular anime for variety
-      const topAnimeResponse = await getTopAnime(1); // API response is { data: Anime[] }
-      const popularAnimeResponse = await searchAnime({ order_by: 'popularity', sort: 'asc', limit: '50' }); // API response is { data: Anime[] }
+      const topAnimeResponse = await getTopAnime(1); 
+      const popularAnimeResponse = await searchAnime({ order_by: 'popularity', sort: 'asc', limit: '50' });
       
-      // Safely access the data property, defaulting to an empty array if undefined or null
-      const topAnimeList = topAnimeResponse?.data || [];
-      const popularAnimeList = popularAnimeResponse?.data || [];
+      // Correctly assign the anime lists
+      const topAnimeList = topAnimeResponse || []; // topAnimeResponse is already Anime[]
+      const popularAnimeList = popularAnimeResponse || []; // popularAnimeResponse is already Anime[]
       
       // Combine data sources and remove duplicates
       // Ensure both lists are actually arrays before spreading
