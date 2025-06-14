@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Palette, Check } from 'lucide-react';
@@ -30,6 +31,23 @@ const themes = [
       card: '#ffffff',
       text: '#000000',
       textMuted: '#666666'
+    }
+  },
+  {
+    id: 'persona',
+    name: 'Persona Universe',
+    description: 'Dark supernatural theme with golden accents and mystical effects',
+    colors: {
+      primary: '#FFD700',
+      secondary: '#FF4500',
+      tertiary: '#8A2BE2',
+      background: '#0A0A0F',
+      accent: '#1A1A25',
+      card: '#151520',
+      text: '#F0F0F0',
+      textMuted: '#A0A0B0',
+      shadow: '#4B0082',
+      glow: '#FFD700'
     }
   },
   {
@@ -116,6 +134,18 @@ export default function ThemeSelector({ currentTheme = '', onThemeChange }: Them
       root.style.setProperty('--theme-card', theme.colors.card);
       root.style.setProperty('--theme-text', theme.colors.text);
       root.style.setProperty('--theme-text-muted', theme.colors.textMuted);
+      
+      // Persona-specific colors
+      if (theme.colors.tertiary) {
+        root.style.setProperty('--theme-tertiary', theme.colors.tertiary);
+      }
+      if (theme.colors.shadow) {
+        root.style.setProperty('--theme-shadow', theme.colors.shadow);
+      }
+      if (theme.colors.glow) {
+        root.style.setProperty('--theme-glow', theme.colors.glow);
+      }
+      
       root.style.setProperty('--anime-red', theme.colors.secondary);
       root.style.setProperty('--anime-blue', theme.colors.primary);
       root.style.setProperty('--anime-dark', theme.colors.background);

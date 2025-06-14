@@ -1,10 +1,13 @@
-
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import MangaDetailsPanel from "@/components/manga/MangaDetailsPanel";
+import PersonaCard from "@/components/effects/PersonaCard";
+import PersonaButton from "@/components/effects/PersonaButton";
+import GlitchText from "@/components/effects/GlitchText";
+import ParticleSystem from "@/components/effects/ParticleSystem";
 import { toast } from "@/components/ui/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Star, TrendingUp, Filter } from "lucide-react";
+import { Search, Star, TrendingUp, Filter, Grid, List, Eye, Shield, Zap } from "lucide-react";
 
 // Expanded mock manga data with more entries
 const mockMangaData = [
@@ -23,7 +26,8 @@ const mockMangaData = [
     authors: [{ mal_id: 1868, name: "Miura, Kentarou" }],
     chapters: 364,
     volumes: 41,
-    published: { string: "Aug 25, 1989 to ?" }
+    published: { string: "Aug 25, 1989 to ?" },
+    arcana: "death"
   },
   {
     mal_id: 2,
@@ -40,7 +44,8 @@ const mockMangaData = [
     authors: [{ mal_id: 1867, name: "Inoue, Takehiko" }],
     chapters: 327,
     volumes: 37,
-    published: { string: "Sep 3, 1998 to ?" }
+    published: { string: "Sep 3, 1998 to ?" },
+    arcana: "hermit"
   },
   {
     mal_id: 3,
@@ -57,7 +62,8 @@ const mockMangaData = [
     authors: [{ mal_id: 1881, name: "Oda, Eiichiro" }],
     chapters: null,
     volumes: null,
-    published: { string: "Jul 22, 1997 to ?" }
+    published: { string: "Jul 22, 1997 to ?" },
+    arcana: "fool"
   },
   {
     mal_id: 4,
@@ -74,7 +80,8 @@ const mockMangaData = [
     authors: [{ mal_id: 11705, name: "Isayama, Hajime" }],
     chapters: 139,
     volumes: 34,
-    published: { string: "Sep 9, 2009 - Apr 9, 2021" }
+    published: { string: "Sep 9, 2009 - Apr 9, 2021" },
+    arcana: "tower"
   },
   {
     mal_id: 5,
@@ -91,7 +98,8 @@ const mockMangaData = [
     authors: [{ mal_id: 39532, name: "Gotouge, Koyoharu" }],
     chapters: 205,
     volumes: 23,
-    published: { string: "Feb 15, 2016 - May 18, 2020" }
+    published: { string: "Feb 15, 2016 - May 18, 2020" },
+    arcana: "strength"
   },
   {
     mal_id: 6,
@@ -108,7 +116,8 @@ const mockMangaData = [
     authors: [{ mal_id: 44909, name: "Akutami, Gege" }],
     chapters: null,
     volumes: null,
-    published: { string: "Mar 5, 2018 to ?" }
+    published: { string: "Mar 5, 2018 to ?" },
+    arcana: "devil"
   },
   {
     mal_id: 7,
@@ -125,7 +134,8 @@ const mockMangaData = [
     authors: [{ mal_id: 42104, name: "Fujimoto, Tatsuki" }],
     chapters: null,
     volumes: null,
-    published: { string: "Dec 3, 2018 to ?" }
+    published: { string: "Dec 3, 2018 to ?" },
+    arcana: "chariot"
   },
   {
     mal_id: 8,
@@ -142,7 +152,8 @@ const mockMangaData = [
     authors: [{ mal_id: 15843, name: "Horikoshi, Kouhei" }],
     chapters: null,
     volumes: null,
-    published: { string: "Jul 7, 2014 to ?" }
+    published: { string: "Jul 7, 2014 to ?" },
+    arcana: "sun"
   },
   {
     mal_id: 9,
@@ -159,7 +170,8 @@ const mockMangaData = [
     authors: [{ mal_id: 34403, name: "Ishida, Sui" }],
     chapters: 144,
     volumes: 14,
-    published: { string: "Sep 8, 2011 - Sep 18, 2014" }
+    published: { string: "Sep 8, 2011 - Sep 18, 2014" },
+    arcana: "hanged"
   },
   {
     mal_id: 10,
@@ -176,7 +188,8 @@ const mockMangaData = [
     authors: [{ mal_id: 1872, name: "Ohba, Tsugumi" }, { mal_id: 1871, name: "Obata, Takeshi" }],
     chapters: 108,
     volumes: 12,
-    published: { string: "Dec 1, 2003 - May 15, 2006" }
+    published: { string: "Dec 1, 2003 - May 15, 2006" },
+    arcana: "judgement"
   },
   {
     mal_id: 11,
@@ -193,7 +206,8 @@ const mockMangaData = [
     authors: [{ mal_id: 1879, name: "Kishimoto, Masashi" }],
     chapters: 700,
     volumes: 72,
-    published: { string: "Sep 21, 1999 - Nov 10, 2014" }
+    published: { string: "Sep 21, 1999 - Nov 10, 2014" },
+    arcana: "magician"
   },
   {
     mal_id: 12,
@@ -210,7 +224,8 @@ const mockMangaData = [
     authors: [{ mal_id: 1874, name: "Arakawa, Hiromu" }],
     chapters: 109,
     volumes: 27,
-    published: { string: "Jul 12, 2001 - Jun 11, 2010" }
+    published: { string: "Jul 12, 2001 - Jun 11, 2010" },
+    arcana: "world"
   }
 ];
 
@@ -221,6 +236,7 @@ export default function MangaBrowse() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("rank");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     // Simulate API loading
@@ -256,147 +272,236 @@ export default function MangaBrowse() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <motion.h1 
-            className="text-3xl font-display font-bold mb-4"
-            style={{ color: 'var(--theme-text)' }}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <span style={{ color: 'var(--theme-primary)' }}>#</span> Browse Manga
-          </motion.h1>
-          
-          {/* Search and Filter Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-3 h-5 w-5" style={{ color: 'var(--theme-text-muted)' }} />
-              <input
-                type="text"
-                placeholder="Search manga..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-accent)',
-                  color: 'var(--theme-text)',
-                  borderWidth: '1px'
-                }}
-              />
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4" style={{ color: 'var(--theme-text-muted)' }} />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 rounded-lg border focus:outline-none focus:ring-2"
-                style={{
-                  backgroundColor: 'var(--theme-card)',
-                  borderColor: 'var(--theme-accent)',
-                  color: 'var(--theme-text)',
-                  borderWidth: '1px'
-                }}
-              >
-                <option value="rank">By Rank</option>
-                <option value="score">By Score</option>
-                <option value="popularity">By Popularity</option>
-              </select>
-            </div>
-          </div>
-          
-          <p className="text-sm mt-2" style={{ color: 'var(--theme-text-muted)' }}>
-            Showing {filteredAndSortedManga.length} manga
-          </p>
+      <div className="relative overflow-hidden">
+        {/* Particle Background */}
+        <div className="fixed inset-0 z-0">
+          <ParticleSystem 
+            particleCount={80}
+            colors={['#FFD700', '#FF4500', '#8A2BE2', '#4B0082']}
+            speed={0.5}
+            size={3}
+          />
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {[...Array(12)].map((_, i) => (
-              <div 
-                key={i} 
-                className="h-80 rounded-lg animate-pulse"
-                style={{ backgroundColor: 'var(--theme-accent)' }}
-              />
-            ))}
-          </div>
-        )}
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          {/* Enhanced Header */}
+          <div className="mb-8">
+            <motion.div
+              initial={{ opacity: 0, y: -30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-6"
+            >
+              <h1 className="text-5xl font-persona-title font-bold mb-2 persona-text-glow">
+                <GlitchText intensity={0.05}>
+                  Manga Compendium
+                </GlitchText>
+              </h1>
+              <p className="text-lg font-persona-ui" style={{ color: 'var(--theme-text-muted)' }}>
+                Discover the Arcana of Stories
+              </p>
+            </motion.div>
+            
+            {/* Enhanced Search and Filter Controls */}
+            <motion.div 
+              className="flex flex-col lg:flex-row gap-4 items-center justify-between"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              {/* Search Bar */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-3 h-5 w-5" style={{ color: 'var(--theme-primary)' }} />
+                <input
+                  type="text"
+                  placeholder="Search the void..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none font-persona-ui glass-morphism"
+                  style={{
+                    borderColor: 'var(--theme-primary)',
+                    color: 'var(--theme-text)',
+                  }}
+                />
+              </div>
+              
+              {/* Controls */}
+              <div className="flex items-center gap-4">
+                {/* Sort Dropdown */}
+                <PersonaCard className="p-0" arcanaType="magician">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-4 py-3 rounded-lg bg-transparent border-none focus:outline-none font-persona-ui"
+                    style={{ color: 'var(--theme-text)' }}
+                  >
+                    <option value="rank" style={{ backgroundColor: 'var(--theme-card)' }}>By Rank</option>
+                    <option value="score" style={{ backgroundColor: 'var(--theme-card)' }}>By Score</option>
+                    <option value="popularity" style={{ backgroundColor: 'var(--theme-card)' }}>By Popularity</option>
+                  </select>
+                </PersonaCard>
 
-        {/* Manga Grid */}
-        {!loading && (
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            {filteredAndSortedManga.map((manga, index) => (
-              <motion.div
-                key={manga.mal_id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="group cursor-pointer"
-                onClick={() => handleMangaClick(manga)}
-              >
-                <div className="relative rounded-lg overflow-hidden transition-transform duration-300 group-hover:scale-105">
-                  <div className="aspect-[3/4] relative">
-                    <img 
-                      src={manga.images.jpg.large_image_url} 
-                      alt={manga.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
-                    {/* Score Badge */}
-                    {manga.score && (
-                      <div className="absolute top-2 right-2 flex items-center bg-black/70 backdrop-blur-sm px-2 py-1 rounded-full">
-                        <Star className="h-3 w-3 text-yellow-400 mr-1 fill-current" />
-                        <span className="text-white text-xs font-bold">{manga.score.toFixed(1)}</span>
-                      </div>
-                    )}
-                    
-                    {/* Rank Badge */}
-                    {manga.rank && manga.rank <= 10 && (
-                      <div className="absolute top-2 left-2 flex items-center bg-gradient-to-r from-yellow-500 to-yellow-600 px-2 py-1 rounded-full">
-                        <TrendingUp className="h-3 w-3 text-white mr-1" />
-                        <span className="text-white text-xs font-bold">#{manga.rank}</span>
-                      </div>
-                    )}
-                    
-                    {/* Title Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                      <h3 className="text-white font-bold text-sm mb-1 line-clamp-2">
-                        {manga.title}
-                      </h3>
-                      <p className="text-gray-300 text-xs">
-                        {manga.status} • {manga.chapters ? `${manga.chapters} chapters` : 'Ongoing'}
-                      </p>
-                    </div>
-                  </div>
+                {/* View Mode Toggle */}
+                <div className="flex rounded-lg overflow-hidden">
+                  <PersonaButton
+                    variant={viewMode === 'grid' ? 'primary' : 'arcana'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                    className="rounded-r-none"
+                  >
+                    <Grid size={16} />
+                  </PersonaButton>
+                  <PersonaButton
+                    variant={viewMode === 'list' ? 'primary' : 'arcana'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className="rounded-l-none"
+                  >
+                    <List size={16} />
+                  </PersonaButton>
                 </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-
-        {/* No Results */}
-        {!loading && filteredAndSortedManga.length === 0 && (
-          <div className="text-center py-12">
-            <p style={{ color: 'var(--theme-text-muted)' }}>No manga found matching your search.</p>
+              </div>
+            </motion.div>
+            
+            <motion.p 
+              className="text-sm mt-4 text-center font-persona-ui" 
+              style={{ color: 'var(--theme-text-muted)' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <GlitchText intensity={0.02}>
+                {filteredAndSortedManga.length} tomes discovered
+              </GlitchText>
+            </motion.p>
           </div>
-        )}
-      </div>
 
-      {/* Manga Details Panel */}
-      <MangaDetailsPanel 
-        manga={selectedManga}
-        isOpen={isPanelOpen}
-        onClose={() => setIsPanelOpen(false)}
-      />
+          {/* Loading State */}
+          {loading && (
+            <div className={`grid ${
+              viewMode === 'grid' 
+                ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' 
+                : 'grid-cols-1'
+            } gap-6`}>
+              {[...Array(12)].map((_, i) => (
+                <PersonaCard key={i} className="h-80 animate-pulse" arcanaType="fool">
+                  <div className="h-full w-full bg-gradient-to-b from-transparent to-black/50" />
+                </PersonaCard>
+              ))}
+            </div>
+          )}
+
+          {/* Manga Grid/List */}
+          {!loading && (
+            <motion.div
+              className={`grid gap-6 ${
+                viewMode === 'grid' 
+                  ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' 
+                  : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              {filteredAndSortedManga.map((manga, index) => (
+                <motion.div
+                  key={manga.mal_id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <PersonaCard
+                    className="cursor-pointer hover-arcana transform-3d"
+                    onClick={() => handleMangaClick(manga)}
+                    arcanaType={manga.arcana || 'fool'}
+                    hover3D={viewMode === 'grid'}
+                  >
+                    <div className={`relative ${viewMode === 'grid' ? 'aspect-[3/4]' : 'aspect-[4/3] sm:aspect-[16/9]'} overflow-hidden rounded-lg`}>
+                      <img 
+                        src={manga.images.jpg.large_image_url} 
+                        alt={manga.title}
+                        className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                      />
+                      
+                      {/* Mystical Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80" />
+                      
+                      {/* Score Badge */}
+                      {manga.score && (
+                        <motion.div 
+                          className="absolute top-3 right-3 flex items-center px-3 py-1 rounded-full glass-morphism"
+                          whileHover={{ scale: 1.1 }}
+                        >
+                          <Star className="h-4 w-4 text-yellow-400 mr-1 fill-current" />
+                          <span className="text-white text-sm font-bold font-persona-ui">{manga.score.toFixed(1)}</span>
+                        </motion.div>
+                      )}
+                      
+                      {/* Rank Badge */}
+                      {manga.rank && manga.rank <= 10 && (
+                        <motion.div 
+                          className="absolute top-3 left-3 flex items-center px-3 py-1 rounded-full"
+                          style={{ background: 'linear-gradient(135deg, #FFD700, #FF4500)' }}
+                          whileHover={{ scale: 1.1 }}
+                        >
+                          <TrendingUp className="h-4 w-4 text-black mr-1" />
+                          <span className="text-black text-sm font-bold font-persona-ui">#{manga.rank}</span>
+                        </motion.div>
+                      )}
+                      
+                      {/* Content */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="text-white font-bold font-persona-title text-lg mb-2 line-clamp-2 persona-text-glow">
+                          {manga.title}
+                        </h3>
+                        <p className="text-gray-300 text-sm font-persona-ui mb-2">
+                          {manga.title_japanese}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-400 text-xs font-persona-ui">
+                            {manga.status} • {manga.chapters ? `${manga.chapters} chapters` : 'Ongoing'}
+                          </span>
+                          {/* Arcana Indicator */}
+                          <div className="flex items-center gap-1">
+                            {manga.arcana === 'death' && <Zap size={12} style={{ color: '#8B0000' }} />}
+                            {manga.arcana === 'strength' && <Shield size={12} style={{ color: '#32CD32' }} />}
+                            {manga.arcana === 'hermit' && <Eye size={12} style={{ color: '#8B4513' }} />}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </PersonaCard>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+
+          {/* No Results */}
+          {!loading && filteredAndSortedManga.length === 0 && (
+            <motion.div 
+              className="text-center py-12"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+            >
+              <PersonaCard className="max-w-md mx-auto p-8" arcanaType="hanged">
+                <div className="text-6xl mb-4">🌙</div>
+                <h3 className="text-xl font-persona-title mb-2" style={{ color: 'var(--theme-primary)' }}>
+                  The Void Echoes Empty
+                </h3>
+                <p className="font-persona-ui" style={{ color: 'var(--theme-text-muted)' }}>
+                  No manga found in this realm. Try a different incantation.
+                </p>
+              </PersonaCard>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Enhanced Manga Details Panel */}
+        <MangaDetailsPanel 
+          manga={selectedManga}
+          isOpen={isPanelOpen}
+          onClose={() => setIsPanelOpen(false)}
+        />
+      </div>
     </Layout>
   );
 }

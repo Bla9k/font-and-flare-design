@@ -24,6 +24,9 @@ export default {
 				'sans': ['"Inter"', 'sans-serif'],
 				'display': ['"Rajdhani"', 'sans-serif'],
 				'jp': ['"Noto Sans JP"', 'sans-serif'],
+				'persona-title': ['"Cinzel"', 'serif'],
+				'persona-ui': ['"Orbitron"', 'monospace'],
+				'persona-body': ['"Inter"', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -76,6 +79,15 @@ export default {
 					gray: '#282828',
 					'light-gray': '#3A3A3A',
 					'cyberpunk-blue': '#00F0FF',
+				},
+				persona: {
+					gold: '#FFD700',
+					flame: '#FF4500',
+					purple: '#8A2BE2',
+					shadow: '#4B0082',
+					void: '#0A0A0F',
+					velvet: '#1A1A25',
+					card: '#151520',
 				}
 			},
 			borderRadius: {
@@ -128,6 +140,48 @@ export default {
 						opacity: '0.5',
 						textShadow: 'none'
 					}
+				},
+				// Persona-specific animations
+				'persona-pulse': {
+					'0%, 100%': { 
+						boxShadow: '0 0 20px rgba(255, 215, 0, 0.3)',
+						transform: 'scale(1)'
+					},
+					'50%': { 
+						boxShadow: '0 0 40px rgba(255, 215, 0, 0.6)',
+						transform: 'scale(1.02)'
+					}
+				},
+				'arcana-rotate': {
+					'0%': { transform: 'rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg)' }
+				},
+				'shadow-flicker': {
+					'0%, 100%': { opacity: '0.8' },
+					'50%': { opacity: '0.4' }
+				},
+				'mystical-float': {
+					'0%, 100%': { 
+						transform: 'translateY(0px) rotate(0deg)', 
+						opacity: '0.7'
+					},
+					'50%': { 
+						transform: 'translateY(-10px) rotate(180deg)', 
+						opacity: '1'
+					}
+				},
+				'tarot-flip': {
+					'0%': { transform: 'rotateY(0deg)' },
+					'50%': { transform: 'rotateY(90deg)' },
+					'100%': { transform: 'rotateY(0deg)' }
+				},
+				'velvet-room-glow': {
+					'0%, 100%': {
+						background: 'radial-gradient(ellipse at center, rgba(138, 43, 226, 0.2) 0%, rgba(255, 215, 0, 0.1) 50%, transparent 100%)'
+					},
+					'50%': {
+						background: 'radial-gradient(ellipse at center, rgba(255, 215, 0, 0.3) 0%, rgba(138, 43, 226, 0.2) 50%, transparent 100%)'
+					}
 				}
 			},
 			animation: {
@@ -137,7 +191,16 @@ export default {
 				'scanline': 'scanline 8s linear infinite',
 				'float': 'float 6s ease-in-out infinite',
 				'pulse-light': 'pulse-light 4s ease-in-out infinite',
-				'text-flicker': 'text-flicker 3s linear infinite'
+				'text-flicker': 'text-flicker 3s linear infinite',
+				'persona-pulse': 'persona-pulse 3s ease-in-out infinite',
+				'arcana-rotate': 'arcana-rotate 20s linear infinite',
+				'shadow-flicker': 'shadow-flicker 2s ease-in-out infinite',
+				'mystical-float': 'mystical-float 6s ease-in-out infinite',
+				'tarot-flip': 'tarot-flip 2s ease-in-out',
+				'velvet-room-glow': 'velvet-room-glow 8s ease-in-out infinite',
+			},
+			backdropBlur: {
+				'xs': '2px',
 			}
 		}
 	},

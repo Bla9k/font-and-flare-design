@@ -1,7 +1,10 @@
+
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -136,6 +139,28 @@
   --theme-text-muted: #D4A574;
 }
 
+/* Persona Theme - The ultimate supernatural experience */
+.theme-persona {
+  --theme-primary: #FFD700;
+  --theme-secondary: #FF4500;
+  --theme-tertiary: #8A2BE2;
+  --theme-background: #0A0A0F;
+  --theme-accent: #1A1A25;
+  --theme-card: #151520;
+  --theme-text: #F0F0F0;
+  --theme-text-muted: #A0A0B0;
+  --theme-shadow: #4B0082;
+  --theme-glow: #FFD700;
+  
+  /* Update anime colors for persona */
+  --anime-red: #FF4500;
+  --anime-blue: #8A2BE2;
+  --anime-dark: #0A0A0F;
+  --anime-gray: #1A1A25;
+  --anime-light-gray: #151520;
+  --anime-cyberpunk-blue: #FFD700;
+}
+
 * {
   border-color: hsl(var(--border));
 }
@@ -144,10 +169,33 @@ body {
   background-color: var(--theme-background);
   color: var(--theme-text);
   font-family: 'Inter', sans-serif;
-  /* Add smooth transition for bg and color (180ms) */
   transition:
     background-color 0.55s cubic-bezier(0.3,0.6,0.3,1),
     color 0.40s cubic-bezier(0.3,0.6,0.3,1);
+}
+
+/* Persona Theme Body Enhancements */
+.theme-persona body {
+  background: 
+    radial-gradient(ellipse at top, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom, rgba(255, 69, 0, 0.1) 0%, transparent 50%),
+    linear-gradient(180deg, #0A0A0F 0%, #1A1A25 100%);
+  min-height: 100vh;
+  position: relative;
+}
+
+.theme-persona body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .theme-transition {
@@ -176,7 +224,7 @@ body {
   text-orientation: mixed;
 }
 
-/* Cyberpunk effects */
+/* Enhanced Cyberpunk effects */
 .scanline {
   position: fixed;
   top: 0;
@@ -211,12 +259,146 @@ body {
   background-size: 50px 50px;
 }
 
+/* Persona-specific effects */
+.theme-persona .persona-glow {
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.3),
+    0 0 40px rgba(255, 215, 0, 0.2),
+    0 0 60px rgba(255, 215, 0, 0.1);
+}
+
+.theme-persona .persona-text-glow {
+  text-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.5),
+    0 0 20px rgba(255, 215, 0, 0.3),
+    0 0 30px rgba(255, 215, 0, 0.2);
+}
+
+.theme-persona .arcana-border {
+  background: linear-gradient(45deg, 
+    var(--theme-primary) 0%, 
+    var(--theme-tertiary) 50%, 
+    var(--theme-secondary) 100%);
+  padding: 2px;
+  border-radius: 12px;
+}
+
+.theme-persona .arcana-border > * {
+  background: var(--theme-card);
+  border-radius: 10px;
+}
+
+/* Enhanced Font Definitions */
+.font-persona-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+}
+
+.font-persona-ui {
+  font-family: 'Orbitron', monospace;
+  font-weight: 500;
+}
+
+.font-persona-body {
+  font-family: 'Inter', sans-serif;
+}
+
 /* Line clamp utility */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Advanced Persona Keyframe Animations */
+@keyframes persona-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes arcana-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes shadow-flicker {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes mystical-float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+    opacity: 0.7;
+  }
+  50% { 
+    transform: translateY(-10px) rotate(180deg); 
+    opacity: 1;
+  }
+}
+
+@keyframes tarot-flip {
+  0% { transform: rotateY(0deg); }
+  50% { transform: rotateY(90deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+@keyframes velvet-room-glow {
+  0%, 100% {
+    background: radial-gradient(ellipse at center, 
+      rgba(138, 43, 226, 0.2) 0%, 
+      rgba(255, 215, 0, 0.1) 50%, 
+      transparent 100%);
+  }
+  50% {
+    background: radial-gradient(ellipse at center, 
+      rgba(255, 215, 0, 0.3) 0%, 
+      rgba(138, 43, 226, 0.2) 50%, 
+      transparent 100%);
+  }
+}
+
+/* Animation Classes */
+.animate-persona-pulse { animation: persona-pulse 3s ease-in-out infinite; }
+.animate-arcana-rotate { animation: arcana-rotate 20s linear infinite; }
+.animate-shadow-flicker { animation: shadow-flicker 2s ease-in-out infinite; }
+.animate-mystical-float { animation: mystical-float 6s ease-in-out infinite; }
+.animate-tarot-flip { animation: tarot-flip 2s ease-in-out; }
+.animate-velvet-room-glow { animation: velvet-room-glow 8s ease-in-out infinite; }
+
+/* 3D Transform Utilities */
+.transform-3d { transform-style: preserve-3d; }
+.backface-hidden { backface-visibility: hidden; }
+
+/* Glass Morphism for Persona */
+.theme-persona .glass-morphism {
+  background: rgba(21, 21, 32, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Hover Effects */
+.theme-persona .hover-arcana:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(255, 215, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-persona .hover-mystical:hover {
+  animation: mystical-float 1s ease-in-out;
+  filter: brightness(1.2) saturate(1.3);
 }
 
 @layer base {
@@ -226,4 +408,24 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Scrollbar Styling for Persona Theme */
+.theme-persona::-webkit-scrollbar {
+  width: 12px;
+}
+
+.theme-persona::-webkit-scrollbar-track {
+  background: var(--theme-accent);
+  border-radius: 6px;
+}
+
+.theme-persona::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--theme-primary), var(--theme-tertiary));
+  border-radius: 6px;
+  border: 2px solid var(--theme-accent);
+}
+
+.theme-persona::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--theme-secondary), var(--theme-primary));
 }
