@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Palette, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ThemeChangeAnimation from '@/components/effects/ThemeChangeAnimation';
 
 const themes = [
   {
@@ -102,6 +103,8 @@ interface ThemeSelectorProps {
 export default function ThemeSelector({ currentTheme = '', onThemeChange }: ThemeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(currentTheme || '');
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [animatingTheme, setAnimatingTheme] = useState('');
 
   // System preference for first load
   useEffect(() => {
@@ -163,10 +166,25 @@ export default function ThemeSelector({ currentTheme = '', onThemeChange }: Them
 
   const handleThemeSelect = (themeId: string) => {
     setSelectedTheme(themeId);
-    applyTheme(themeId);
+    setAnimatingTheme(themeId);
+    
+    // Show animation for Persona theme
+    if (themeId === 'persona') {
+      setShowAnimation(true);
+      // Apply theme immediately but show animation
+      applyTheme(themeId);
+    } else {
+      applyTheme(themeId);
+    }
+    
     onThemeChange?.(themeId);
     localStorage.setItem('selected-theme', themeId);
     setIsOpen(false);
+  };
+
+  const handleAnimationComplete = () => {
+    setShowAnimation(false);
+    setAnimatingTheme('');
   };
 
   // System default option
@@ -181,104 +199,113 @@ export default function ThemeSelector({ currentTheme = '', onThemeChange }: Them
   };
 
   return (
-    <div className="relative z-[120]">
-      <Button
-        onClick={() => setIsOpen(!isOpen)}
-        variant="outline"
-        className="border-anime-light-gray/50 hover:bg-anime-gray/60 transition-colors"
-        style={{
-          backgroundColor: `var(--theme-card)`,
-          borderColor: `var(--theme-accent)`,
-          color: `var(--theme-text)`
-        }}
-      >
-        <Palette className="h-4 w-4 mr-2" />
-        Themes
-      </Button>
+    <>
+      <div className="relative z-[120]">
+        <Button
+          onClick={() => setIsOpen(!isOpen)}
+          variant="outline"
+          className="border-anime-light-gray/50 hover:bg-anime-gray/60 transition-colors"
+          style={{
+            backgroundColor: `var(--theme-card)`,
+            borderColor: `var(--theme-accent)`,
+            color: `var(--theme-text)`
+          }}
+        >
+          <Palette className="h-4 w-4 mr-2" />
+          Themes
+        </Button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.96 }}
-            className="absolute top-full mt-2 right-0 w-80 border rounded-lg shadow-2xl z-[120]"
-            style={{
-              background: `rgba(18,18,18,0.99)`,
-              borderColor: `var(--theme-accent)`,
-              color: `var(--theme-text)`
-            }}
-          >
-            <div className="p-4">
-              <h3 className="text-lg font-display font-bold mb-4" style={{ color: `var(--theme-primary)` }}>
-                Choose Theme
-              </h3>
-              <div className="space-y-3">
-                {themes.map((theme) => (
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.96 }}
+              className="absolute top-full mt-2 right-0 w-80 border rounded-lg shadow-2xl z-[120]"
+              style={{
+                background: `rgba(18,18,18,0.99)`,
+                borderColor: `var(--theme-accent)`,
+                color: `var(--theme-text)`
+              }}
+            >
+              <div className="p-4">
+                <h3 className="text-lg font-display font-bold mb-4" style={{ color: `var(--theme-primary)` }}>
+                  Choose Theme
+                </h3>
+                <div className="space-y-3">
+                  {themes.map((theme) => (
+                    <motion.button
+                      key={theme.id}
+                      onClick={() => handleThemeSelect(theme.id)}
+                      className={`w-full p-3 rounded-lg border transition-all text-left ${
+                        selectedTheme === theme.id
+                          ? 'border-current bg-opacity-15'
+                          : 'border-opacity-30 hover:border-opacity-60'
+                      }`}
+                      style={{
+                        borderColor: selectedTheme === theme.id ? theme.colors.primary : `var(--theme-accent)`,
+                        backgroundColor: selectedTheme === theme.id ? `${theme.colors.primary}22` : 'rgba(0,0,0,0.00)'
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <div className="flex space-x-1">
+                              {Object.values(theme.colors).slice(0, 4).map((color, index) => (
+                                <div
+                                  key={index}
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ backgroundColor: color, border: "1px solid #222" }}
+                                />
+                              ))}
+                            </div>
+                            <h4 className="font-medium" style={{ color: `var(--theme-text)` }}>{theme.name}</h4>
+                          </div>
+                          <p className="text-sm" style={{ color: `var(--theme-text-muted)` }}>{theme.description}</p>
+                        </div>
+                        {selectedTheme === theme.id && (
+                          <Check className="h-5 w-5" style={{ color: theme.colors.primary }} />
+                        )}
+                      </div>
+                    </motion.button>
+                  ))}
                   <motion.button
-                    key={theme.id}
-                    onClick={() => handleThemeSelect(theme.id)}
-                    className={`w-full p-3 rounded-lg border transition-all text-left ${
-                      selectedTheme === theme.id
-                        ? 'border-current bg-opacity-15'
-                        : 'border-opacity-30 hover:border-opacity-60'
-                    }`}
-                    style={{
-                      borderColor: selectedTheme === theme.id ? theme.colors.primary : `var(--theme-accent)`,
-                      backgroundColor: selectedTheme === theme.id ? `${theme.colors.primary}22` : 'rgba(0,0,0,0.00)'
-                    }}
-                    whileHover={{ scale: 1.02 }}
+                    onClick={handleSystemDefault}
+                    className="w-full mt-1 p-3 rounded-lg border border-dashed border-anime-cyberpunk-blue transition-all text-left hover:bg-anime-cyberpunk-blue/10"
+                    whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <div className="flex space-x-1">
-                            {Object.values(theme.colors).slice(0, 4).map((color, index) => (
-                              <div
-                                key={index}
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: color, border: "1px solid #222" }}
-                              />
-                            ))}
-                          </div>
-                          <h4 className="font-medium" style={{ color: `var(--theme-text)` }}>{theme.name}</h4>
-                        </div>
-                        <p className="text-sm" style={{ color: `var(--theme-text-muted)` }}>{theme.description}</p>
-                      </div>
-                      {selectedTheme === theme.id && (
-                        <Check className="h-5 w-5" style={{ color: theme.colors.primary }} />
-                      )}
-                    </div>
+                    <span className="font-medium">System Default</span>
+                    <span className="ml-2 text-xs text-anime-cyberpunk-blue">(match OS)</span>
                   </motion.button>
-                ))}
-                <motion.button
-                  onClick={handleSystemDefault}
-                  className="w-full mt-1 p-3 rounded-lg border border-dashed border-anime-cyberpunk-blue transition-all text-left hover:bg-anime-cyberpunk-blue/10"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <span className="font-medium">System Default</span>
-                  <span className="ml-2 text-xs text-anime-cyberpunk-blue">(match OS)</span>
-                </motion.button>
+                </div>
+                <div className="mt-4 pt-4 border-t" style={{ borderColor: `var(--theme-accent)` }}>
+                  <p className="text-xs" style={{ color: `var(--theme-text-muted)` }}>
+                    Theme changes are smooth and saved to your preferences.
+                  </p>
+                </div>
               </div>
-              <div className="mt-4 pt-4 border-t" style={{ borderColor: `var(--theme-accent)` }}>
-                <p className="text-xs" style={{ color: `var(--theme-text-muted)` }}>
-                  Theme changes are smooth and saved to your preferences.
-                </p>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {/* Backdrop */}
+        {isOpen && (
+          <div 
+            className="fixed inset-0 z-[110]"
+            style={{ background: 'transparent' }}
+            onClick={() => setIsOpen(false)}
+          />
         )}
-      </AnimatePresence>
-      {/* Backdrop */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-[110]"
-          style={{ background: 'transparent' }}
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-    </div>
+      </div>
+
+      {/* Theme Change Animation */}
+      <ThemeChangeAnimation
+        themeName={animatingTheme}
+        show={showAnimation}
+        onComplete={handleAnimationComplete}
+      />
+    </>
   );
 }

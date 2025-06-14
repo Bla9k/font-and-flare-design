@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import MangaDetailsPanel from "@/components/manga/MangaDetailsPanel";
@@ -370,7 +371,7 @@ export default function MangaBrowse() {
               transition={{ delay: 0.4 }}
             >
               <GlitchText intensity={0.02}>
-                {filteredAndSortedManga.length} tomes discovered
+                {filteredAndSortedManga.length.toString()} tomes discovered
               </GlitchText>
             </motion.p>
           </div>
@@ -408,10 +409,11 @@ export default function MangaBrowse() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
+                  onClick={() => handleMangaClick(manga)}
+                  className="cursor-pointer"
                 >
                   <PersonaCard
-                    className="cursor-pointer hover-arcana transform-3d"
-                    onClick={() => handleMangaClick(manga)}
+                    className="hover-arcana transform-3d"
                     arcanaType={manga.arcana || 'fool'}
                     hover3D={viewMode === 'grid'}
                   >

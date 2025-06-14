@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
 interface GlitchTextProps {
-  children: string;
+  children: string | number;
   className?: string;
   intensity?: number;
   speed?: number;
@@ -15,13 +15,14 @@ export default function GlitchText({
   intensity = 0.1, 
   speed = 100 
 }: GlitchTextProps) {
-  const [glitchedText, setGlitchedText] = useState(children);
+  const text = children.toString();
+  const [glitchedText, setGlitchedText] = useState(text);
   const [isGlitching, setIsGlitching] = useState(false);
 
   const glitchChars = '!@#$%^&*()[]{}|;:,.<>?';
   
-  const createGlitch = (text: string) => {
-    return text
+  const createGlitch = (inputText: string) => {
+    return inputText
       .split('')
       .map(char => {
         if (/^[0-9a-zA-Z]+$/.test(char) && Math.random() < intensity) {
@@ -40,11 +41,11 @@ export default function GlitchText({
       let glitchCount = 0;
       
       interval = setInterval(() => {
-        setGlitchedText(createGlitch(children));
+        setGlitchedText(createGlitch(text));
         glitchCount++;
         
         if (glitchCount > Math.random() * 10 + 5) {
-          setGlitchedText(children);
+          setGlitchedText(text);
           setIsGlitching(false);
           clearInterval(interval);
           
@@ -61,7 +62,7 @@ export default function GlitchText({
       clearInterval(interval);
       clearTimeout(initialTimeout);
     };
-  }, [children, intensity, speed]);
+  }, [text, intensity, speed]);
 
   return (
     <motion.span
